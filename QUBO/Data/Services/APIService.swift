@@ -1,13 +1,30 @@
 // MARK: - Data/Services/APIService.swift
 import Foundation
 
-enum APIError: Error {
+enum APIError: Error, LocalizedError {
     case invalidURL
     case noData
     case decodingError
     case networkError
     case authenticationFailed
     case serverError(Int)
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "URL inválida"
+        case .noData:
+            return "No se recibieron datos"
+        case .decodingError:
+            return "Error al procesar los datos"
+        case .networkError:
+            return "Error de red"
+        case .authenticationFailed:
+            return "Error de autenticación"
+        case .serverError(let code):
+            return "Error del servidor: \(code)"
+        }
+    }
 }
 
 class APIService {
@@ -250,9 +267,11 @@ class APIService {
         }
         
         // Obtener URL de la imagen si existe
-        var imageUrl = "gamepad.fill" // Default
-        if let imageId = apiGame.acf.image {
-            imageUrl = try await getMediaURL(for: imageId) ?? "gamepad.fill"
+        var imageUrl = "gamecontroller.fill" // Default icon
+        
+        // Obtener el ID de la imagen usando el helper
+        if let imageId = apiGame.acf.imageId {
+            imageUrl = try await getMediaURL(for: imageId) ?? "gamecontroller.fill"
         }
         
         return Game(
@@ -274,17 +293,19 @@ class APIService {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            return nil
-        }
-        
         do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                print("Failed to get media URL for ID \(mediaId)")
+                return nil
+            }
+            
             let mediaResponse = try JSONDecoder().decode(MediaUploadResponse.self, from: data)
             return mediaResponse.sourceUrl
         } catch {
+            print("Error getting media URL: \(error)")
             return nil
         }
     }

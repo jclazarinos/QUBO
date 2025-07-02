@@ -10,150 +10,228 @@ struct GameDetailView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack {
-                Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                }
+            // Header with Retro Style - IMPROVED LAYOUT
+            ZStack {
+                // Background with pattern
+                AppTheme.primaryColor
+                    .overlay(
+                        // Subtle pixel pattern
+                        Rectangle()
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.white.opacity(0.1),
+                                        Color.clear
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    )
                 
-                Spacer()
-                
-                Text("REVIEW")
-                    .font(AppTheme.largeTitle)
-                    .foregroundColor(.white)
-                
-                Spacer()
-                
-                // Options menu
-                Menu {
-                    Button {
-                        showingEditSheet = true
-                    } label: {
-                        Label("Edit Game", systemImage: "pencil")
+                HStack(spacing: AppTheme.mediumSpacing) {
+                    // Close Button
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 18, weight: .bold, design: .monospaced))
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                            .background(
+                                RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
+                                    .fill(Color.white.opacity(0.2))
+                            )
                     }
                     
-                    Button(role: .destructive) {
-                        showingDeleteAlert = true
+                    // Title - Centered with overlay for better layout
+                    Color.clear
+                        .frame(maxWidth: .infinity)
+                        .overlay(
+                            Text("GAME REVIEW")
+                                .font(AppTheme.title)
+                                .foregroundColor(.white)
+                                .textCase(.uppercase)
+                        )
+                    
+                    // Options Menu
+                    Menu {
+                        Button {
+                            showingEditSheet = true
+                        } label: {
+                            Label("EDIT GAME", systemImage: "pencil")
+                                .font(AppTheme.body)
+                        }
+                        
+                        Button(role: .destructive) {
+                            showingDeleteAlert = true
+                        } label: {
+                            Label("DELETE GAME", systemImage: "trash")
+                                .font(AppTheme.body)
+                        }
                     } label: {
-                        Label("Delete Game", systemImage: "trash")
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 18, weight: .bold, design: .monospaced))
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                            .background(
+                                RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
+                                    .fill(Color.white.opacity(0.2))
+                            )
                     }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
                 }
+                .padding(.horizontal, AppTheme.largeSpacing)
+                .padding(.vertical, AppTheme.mediumSpacing)
             }
-            .padding(.horizontal, AppTheme.largeSpacing)
-            .padding(.vertical, 20)
-            .background(AppTheme.primaryColor)
+            .frame(height: 64) // Fixed height for consistency
             
             ScrollView {
                 VStack(spacing: AppTheme.largeSpacing) {
-                    // Game Header
-                    HStack(spacing: AppTheme.mediumSpacing) {
-                        RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius)
-                            .fill(AppTheme.textColor)
-                            .frame(width: 80, height: 80)
-                            .overlay(
-                                Group {
-                                    if game.coverImage.hasPrefix("http") {
-                                        // AsyncImage for URL
-                                        AsyncImage(url: URL(string: game.coverImage)) { image in
-                                            image
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fill)
-                                        } placeholder: {
-                                            Image(systemName: "gamepad.fill")
-                                                .font(.system(size: AppTheme.mediumIconSize))
+                    // Game Header Card
+                    VStack(spacing: AppTheme.mediumSpacing) {
+                        HStack(spacing: AppTheme.mediumSpacing) {
+                            // Game Cover
+                            RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius)
+                                .fill(AppTheme.textColor)
+                                .frame(width: 100, height: 100)
+                                .overlay(
+                                    Group {
+                                        if game.coverImage.hasPrefix("http") {
+                                            AsyncImage(url: URL(string: game.coverImage)) { image in
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                            } placeholder: {
+                                                Image(systemName: "gamepad.fill")
+                                                    .font(.system(size: AppTheme.largeIconSize, design: .monospaced))
+                                                    .foregroundColor(.white)
+                                            }
+                                            .clipShape(RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius))
+                                        } else {
+                                            Image(systemName: game.coverImage)
+                                                .font(.system(size: AppTheme.largeIconSize, design: .monospaced))
                                                 .foregroundColor(.white)
                                         }
-                                        .clipShape(RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius))
-                                    } else {
-                                        // SF Symbol
-                                        Image(systemName: game.coverImage)
-                                            .font(.system(size: AppTheme.mediumIconSize))
-                                            .foregroundColor(.white)
                                     }
-                                }
-                            )
-                        
-                        VStack(alignment: .leading, spacing: AppTheme.smallSpacing) {
-                            Text(game.title)
-                                .font(AppTheme.title)
-                                .foregroundColor(.black)
-                                .lineLimit(2)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius)
+                                        .stroke(AppTheme.accentColor, lineWidth: 2)
+                                )
                             
-                            Text(game.platform)
-                                .font(AppTheme.body)
-                                .foregroundColor(AppTheme.accentColor)
-                            
-                            Text(game.formattedDate)
-                                .font(AppTheme.caption)
-                                .foregroundColor(AppTheme.textColor)
-                            
-                            // Score with stars
-                            HStack(spacing: 4) {
-                                ForEach(1...10, id: \.self) { index in
-                                    Image(systemName: index <= game.score ? "star.fill" : "star")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(index <= game.score ? AppTheme.secondaryColor : .gray)
-                                }
+                            // Game Info
+                            VStack(alignment: .leading, spacing: AppTheme.smallSpacing) {
+                                Text(game.title.uppercased())
+                                    .font(AppTheme.title)
+                                    .foregroundColor(AppTheme.primaryColor)
+                                    .lineLimit(2)
                                 
-                                Text("\(game.score)/10")
+                                Text(game.platform.uppercased())
+                                    .font(AppTheme.body)
+                                    .foregroundColor(AppTheme.accentColor)
+                                
+                                Text("COMPLETED: \(game.formattedDate.uppercased())")
                                     .font(AppTheme.caption)
-                                    .foregroundColor(AppTheme.secondaryColor)
-                                    .padding(.leading, AppTheme.smallSpacing)
+                                    .foregroundColor(AppTheme.textColor)
+                                
+                                // Pixel-style Score
+                                HStack(spacing: 6) {
+                                    Text("SCORE:")
+                                        .font(AppTheme.caption)
+                                        .foregroundColor(AppTheme.textColor)
+                                    
+                                    HStack(spacing: 2) {
+                                        ForEach(1...10, id: \.self) { index in
+                                            Rectangle()
+                                                .fill(index <= game.score ? AppTheme.secondaryColor : AppTheme.textColor.opacity(0.3))
+                                                .frame(width: 8, height: 8)
+                                        }
+                                    }
+                                    
+                                    Text("\(game.score)/10")
+                                        .font(AppTheme.body)
+                                        .foregroundColor(AppTheme.secondaryColor)
+                                        .fontWeight(.bold)
+                                }
                             }
+                            
+                            Spacer()
                         }
-                        
-                        Spacer()
                     }
+                    .padding(AppTheme.mediumSpacing)
+                    .background(
+                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
+                            .fill(Color.white)
+                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
+                    )
                     
                     // Review Section
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(spacing: AppTheme.mediumSpacing) {
                         HStack {
                             Text("MY REVIEW")
-                                .font(AppTheme.body)
+                                .font(AppTheme.title)
                                 .foregroundColor(AppTheme.primaryColor)
+                                .textCase(.uppercase)
                             
                             Spacer()
                             
                             Button {
                                 showingEditSheet = true
                             } label: {
-                                Image(systemName: "pencil.circle.fill")
-                                    .font(.title2)
-                                    .foregroundColor(AppTheme.accentColor)
+                                HStack(spacing: 4) {
+                                    Image(systemName: "pencil")
+                                        .font(.system(size: 12, design: .monospaced))
+                                    Text("EDIT")
+                                        .font(AppTheme.caption)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(AppTheme.accentColor)
+                                .cornerRadius(AppTheme.smallCornerRadius)
                             }
                         }
                         
                         Text(game.review)
                             .font(.system(size: 16, weight: .regular, design: .default))
-                            .foregroundColor(.black)
-                            .lineSpacing(4)
-                            .padding(.top, 8)
+                            .foregroundColor(AppTheme.textColor)
+                            .lineSpacing(6)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    .padding(AppTheme.mediumSpacing)
+                    .background(
+                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
+                            .fill(Color.white)
+                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
+                    )
                     
-                    // Game Stats (if needed)
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("GAME INFO")
-                            .font(AppTheme.body)
-                            .foregroundColor(AppTheme.primaryColor)
+                    // Game Stats Card
+                    VStack(spacing: AppTheme.mediumSpacing) {
+                        HStack {
+                            Text("GAME DATA")
+                                .font(AppTheme.title)
+                                .foregroundColor(AppTheme.primaryColor)
+                                .textCase(.uppercase)
+                            
+                            Spacer()
+                        }
                         
-                        VStack(spacing: 8) {
-                            InfoRow(title: "Platform", value: game.platform)
-                            InfoRow(title: "Completed", value: game.formattedDate)
-                            InfoRow(title: "Score", value: "\(game.score)/10")
-                            InfoRow(title: "Game ID", value: "#\(game.id)")
+                        VStack(spacing: AppTheme.smallSpacing) {
+                            PixelInfoRow(title: "PLATFORM", value: game.platform.uppercased())
+                            PixelInfoRow(title: "COMPLETED", value: game.formattedDate.uppercased())
+                            PixelInfoRow(title: "RATING", value: "\(game.score)/10")
+                            PixelInfoRow(title: "GAME ID", value: "#\(String(format: "%04d", game.id))")
                         }
                     }
+                    .padding(AppTheme.mediumSpacing)
+                    .background(
+                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
+                            .fill(Color.white)
+                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
+                    )
                 }
                 .padding(.horizontal, AppTheme.largeSpacing)
-                .padding(.top, AppTheme.largeSpacing)
+                .padding(.top, AppTheme.mediumSpacing)
                 .padding(.bottom, 40)
             }
             .background(AppTheme.backgroundColor)
@@ -161,13 +239,14 @@ struct GameDetailView: View {
         .sheet(isPresented: $showingEditSheet) {
             EditGameView(game: game, viewModel: viewModel)
         }
-        .alert("Delete Game", isPresented: $showingDeleteAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
+        .alert("DELETE GAME", isPresented: $showingDeleteAlert) {
+            Button("CANCEL", role: .cancel) { }
+            Button("DELETE", role: .destructive) {
                 deleteGame()
             }
         } message: {
-            Text("Are you sure you want to delete '\(game.title)'? This action cannot be undone.")
+            Text("Are you sure you want to delete '\(game.title.uppercased())'? This action cannot be undone.")
+                .font(AppTheme.body)
         }
     }
     
@@ -178,26 +257,32 @@ struct GameDetailView: View {
 }
 
 // MARK: - Supporting Views
-struct InfoRow: View {
+struct PixelInfoRow: View {
     let title: String
     let value: String
     
     var body: some View {
         HStack {
             Text(title)
-                .font(.caption)
+                .font(AppTheme.caption)
                 .foregroundColor(AppTheme.textColor)
-                .frame(width: 80, alignment: .leading)
+                .frame(width: 100, alignment: .leading)
+            
+            Rectangle()
+                .fill(AppTheme.textColor.opacity(0.3))
+                .frame(height: 1)
+                .frame(maxWidth: .infinity)
             
             Text(value)
-                .font(.caption)
-                .foregroundColor(.black)
-            
-            Spacer()
+                .font(AppTheme.body)
+                .foregroundColor(AppTheme.primaryColor)
+                .fontWeight(.bold)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(8)
+        .padding(.horizontal, AppTheme.smallSpacing)
+        .padding(.vertical, AppTheme.smallSpacing)
+        .background(
+            RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
+                .fill(AppTheme.backgroundColor)
+        )
     }
 }

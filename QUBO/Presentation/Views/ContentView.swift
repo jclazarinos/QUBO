@@ -7,78 +7,41 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            // Main Content (always visible)
-            HStack(spacing: 0) {
+            // Main Content Structure
+            VStack(spacing: 0) {
+                // Top Bar
+                TopBar(viewModel: viewModel, showSidebar: $showSidebar)
+                
                 // Main Content Area
                 MainContentView(viewModel: viewModel)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .navigationTitle("Games")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    showSidebar.toggle()
-                                }
-                            } label: {
-                                Image(systemName: "sidebar.left")
-                                    .foregroundColor(.primary)
-                            }
-                        }
-                        
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            HStack {
-                                // API Status Indicator
-                                Circle()
-                                    .fill(viewModel.useRemoteAPI ? Color.green : Color.orange)
-                                    .frame(width: 8, height: 8)
+            }
+            .overlay(
+                // Loading indicator
+                Group {
+                    if viewModel.isLoading {
+                        ZStack {
+                            Color.black.opacity(0.3)
+                                .ignoresSafeArea()
+                            
+                            VStack(spacing: 16) {
+                                ProgressView()
+                                    .scaleEffect(1.2)
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 
-                                // Toggle para API/Local (opcional, comentado por ahora)
-                                // Toggle("API", isOn: $viewModel.useRemoteAPI)
-                                //     .toggleStyle(SwitchToggleStyle(tint: .blue))
-                                
-                                // Refresh button
-                                Button {
-                                    viewModel.refreshGames()
-                                } label: {
-                                    Image(systemName: "arrow.clockwise")
-                                        .rotationEffect(.degrees(viewModel.isLoading ? 360 : 0))
-                                        .animation(
-                                            viewModel.isLoading ?
-                                            .linear(duration: 1).repeatForever(autoreverses: false) :
-                                            .default,
-                                            value: viewModel.isLoading
-                                        )
-                                }
-                                .disabled(viewModel.isLoading)
+                                Text("Loading games...")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
                             }
+                            .padding(24)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(.ultraThinMaterial)
+                            )
                         }
                     }
-                    .overlay(
-                        // Loading indicator
-                        Group {
-                            if viewModel.isLoading {
-                                ZStack {
-                                    Color.black.opacity(0.3)
-                                        .ignoresSafeArea()
-                                    
-                                    VStack(spacing: 16) {
-                                        ProgressView()
-                                            .scaleEffect(1.2)
-                                        Text("Loading games...")
-                                            .font(.headline)
-                                            .foregroundColor(.white)
-                                    }
-                                    .padding(24)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(.ultraThinMaterial)
-                                    )
-                                }
-                            }
-                        }
-                    )
-            }
+                }
+            )
             
             // Sidebar Overlay (slides in from left)
             if showSidebar {

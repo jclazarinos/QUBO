@@ -35,7 +35,7 @@ struct GameAPIResponse: Codable {
     
     struct GameACF: Codable {
         let title: String?
-        let image: Int?
+        let image: AnyCodable? // Usando AnyCodable para manejar Int o String
         let gamestatus: String?
         let platform: [String]?
         let description: String?
@@ -48,6 +48,59 @@ struct GameAPIResponse: Codable {
             case title, image, gamestatus, platform, description, trailer, review, score
             case anoFinalizado = "ano_finalizado"
         }
+        
+        // Helper para obtener el ID de la imagen
+        var imageId: Int? {
+            if let intValue = image?.value as? Int {
+                return intValue
+            } else if let stringValue = image?.value as? String,
+                      let intValue = Int(stringValue) {
+                return intValue
+            }
+            return nil
+        }
+    }
+}
+
+// MARK: - AnyCodable Helper
+struct AnyCodable: Codable {
+    let value: Any
+    
+    init(_ value: Any) {
+        self.value = value
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        
+        if let intValue = try? container.decode(Int.self) {
+            value = intValue
+        } else if let stringValue = try? container.decode(String.self) {
+            value = stringValue
+        } else if let boolValue = try? container.decode(Bool.self) {
+            value = boolValue
+        } else if let doubleValue = try? container.decode(Double.self) {
+            value = doubleValue
+        } else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unable to decode value")
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        
+        switch value {
+        case let intValue as Int:
+            try container.encode(intValue)
+        case let stringValue as String:
+            try container.encode(stringValue)
+        case let boolValue as Bool:
+            try container.encode(boolValue)
+        case let doubleValue as Double:
+            try container.encode(doubleValue)
+        default:
+            throw EncodingError.invalidValue(value, EncodingError.Context(codingPath: [], debugDescription: "Unable to encode value"))
+        }
     }
 }
 
@@ -59,7 +112,7 @@ struct CreateGameRequest: Codable {
     
     struct GameACFRequest: Codable {
         let title: String
-        let image: Int?
+        let image: Int? // Para crear, siempre enviamos Int
         let gamestatus: String
         let platform: [String]
         let description: String
@@ -101,7 +154,7 @@ extension GameAPIResponse.GameACF {
             platform: self.platform?.first ?? "Unknown",
             completionDate: date,
             score: self.score ?? 0,
-            coverImage: "", // Se obtendrá la URL de la imagen por separado
+            coverImage: "gamecontroller.fill", // Se actualizará con la URL real
             review: self.review ?? ""
         )
     }
@@ -118,7 +171,7 @@ extension Game {
             acf: CreateGameRequest.GameACFRequest(
                 title: self.title,
                 image: nil, // Se asignará después de subir la imagen
-                gamestatus: "Finalizado", // Valor por defecto
+                gamestatus: "Finalizado",
                 platform: [self.platform],
                 description: self.review,
                 trailer: nil,

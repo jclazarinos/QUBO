@@ -10,7 +10,10 @@ class GamesViewModel: ObservableObject {
     @Published var selectedTheme: Theme = .games
     @Published var showingAddGame = false
     @Published var selectedGame: Game?
-    
+    @Published var isLoadingMore = false
+    private var currentPage = 1
+    private var hasMorePages = true
+    private let gamesPerPage = 20
     // MARK: - API State Management
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -104,18 +107,59 @@ class GamesViewModel: ObservableObject {
         }
     }
     
+    // REEMPLAZAR TU MÉTODO loadGames() CON ESTE:
     func loadGames() {
+        // Reset para carga inicial
+        currentPage = 1
+        hasMorePages = true
+        games = []
+        
         isLoading = true
         errorMessage = nil
         
         Task {
             do {
-                let fetchedGames = try await gameUseCases.getAllGames()
+                let fetchedGames = try await gameUseCases.getGames(page: currentPage, perPage: gamesPerPage)
+                print("📱 Initial load: \(fetchedGames.count) games loaded")
+                
                 self.games = fetchedGames
+                self.hasMorePages = fetchedGames.count == gamesPerPage
                 self.isLoading = false
+                
+                print("🔄 Has more pages: \(hasMorePages)")
             } catch {
                 self.errorMessage = "Error loading games: \(error.localizedDescription)"
                 self.isLoading = false
+            }
+        }
+    }
+
+    // AGREGAR ESTE NUEVO MÉTODO:
+    func loadMoreGames() {
+        guard !isLoadingMore && hasMorePages && !isLoading else {
+            print("⚠️ Load more blocked: isLoadingMore=\(isLoadingMore), hasMorePages=\(hasMorePages), isLoading=\(isLoading)")
+            return
+        }
+        
+        print("🚀 Loading more games - Page \(currentPage + 1)")
+        isLoadingMore = true
+        currentPage += 1
+        
+        Task {
+            do {
+                let newGames = try await gameUseCases.getGames(page: currentPage, perPage: gamesPerPage)
+                print("📦 Loaded \(newGames.count) more games from page \(currentPage)")
+                
+                self.games.append(contentsOf: newGames)
+                self.hasMorePages = newGames.count == gamesPerPage
+                self.isLoadingMore = false
+                
+                print("🎮 Total games now: \(games.count)")
+            } catch {
+                print("❌ Error loading more games: \(error)")
+                self.errorMessage = "Error loading more games: \(error.localizedDescription)"
+                self.isLoadingMore = false
+                self.currentPage -= 1
             }
         }
     }

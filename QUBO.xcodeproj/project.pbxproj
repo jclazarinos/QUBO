@@ -11,7 +11,6 @@
 		3CECBAFC2E15C188002BE9F8 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CECBAFB2E15C188002BE9F8 /* APIService.swift */; };
 		3CECBAFE2E15CC61002BE9F8 /* EditGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CECBAFD2E15CC61002BE9F8 /* EditGameView.swift */; };
 		3CECBB012E15DC04002BE9F8 /* TopBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CECBB002E15DC04002BE9F8 /* TopBar.swift */; };
-		3CECBB032E15EBD5002BE9F8 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3CECBB022E15EBD5002BE9F8 /* Info.plist */; };
 		3CF90E1F2E0C846A0002C212 /* QUBOApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF90E1E2E0C846A0002C212 /* QUBOApp.swift */; };
 		3CF90E212E0C846A0002C212 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF90E202E0C846A0002C212 /* ContentView.swift */; };
 		3CF90E232E0C846C0002C212 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CF90E222E0C846C0002C212 /* Assets.xcassets */; };
@@ -35,6 +34,7 @@
 		3CF90E5E2E0C8A790002C212 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF90E5D2E0C8A790002C212 /* SidebarView.swift */; };
 		3CF90E602E0C8A860002C212 /* AccordionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF90E5F2E0C8A860002C212 /* AccordionSection.swift */; };
 		3CF90E632E0C8A980002C212 /* MenuButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF90E622E0C8A980002C212 /* MenuButton.swift */; };
+		579FACDD2E1BAD4200CB152B /* RemoteGameDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACDC2E1BAD4200CB152B /* RemoteGameDataSource.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,7 +42,6 @@
 		3CECBAFB2E15C188002BE9F8 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
 		3CECBAFD2E15CC61002BE9F8 /* EditGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditGameView.swift; sourceTree = "<group>"; };
 		3CECBB002E15DC04002BE9F8 /* TopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopBar.swift; sourceTree = "<group>"; };
-		3CECBB022E15EBD5002BE9F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CF90E1B2E0C846A0002C212 /* QUBO.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QUBO.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CF90E1E2E0C846A0002C212 /* QUBOApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QUBOApp.swift; sourceTree = "<group>"; };
 		3CF90E202E0C846A0002C212 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -67,6 +66,7 @@
 		3CF90E5D2E0C8A790002C212 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		3CF90E5F2E0C8A860002C212 /* AccordionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordionSection.swift; sourceTree = "<group>"; };
 		3CF90E622E0C8A980002C212 /* MenuButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuButton.swift; sourceTree = "<group>"; };
+		579FACDC2E1BAD4200CB152B /* RemoteGameDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteGameDataSource.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,7 +129,6 @@
 				3CF90E2C2E0C84C20002C212 /* App */,
 				3CF90E222E0C846C0002C212 /* Assets.xcassets */,
 				3CF90E242E0C846C0002C212 /* Preview Content */,
-				3CECBB022E15EBD5002BE9F8 /* Info.plist */,
 			);
 			path = QUBO;
 			sourceTree = "<group>";
@@ -181,6 +180,7 @@
 			isa = PBXGroup;
 			children = (
 				3CF90E3D2E0C87420002C212 /* GameRepositoryProtocol.swift */,
+				579FACDC2E1BAD4200CB152B /* RemoteGameDataSource.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -359,7 +359,6 @@
 			files = (
 				3CF90E262E0C846C0002C212 /* Preview Assets.xcassets in Resources */,
 				3CF90E232E0C846C0002C212 /* Assets.xcassets in Resources */,
-				3CECBB032E15EBD5002BE9F8 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -394,6 +393,7 @@
 				3CF90E5A2E0C89B70002C212 /* Color+Extensions.swift in Sources */,
 				3CF90E382E0C867E0002C212 /* Game.swift in Sources */,
 				3CF90E4D2E0C88250002C212 /* MainContentView.swift in Sources */,
+				579FACDD2E1BAD4200CB152B /* RemoteGameDataSource.swift in Sources */,
 				3CF90E532E0C884E0002C212 /* GameListItemView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -525,6 +525,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"QUBO/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_FILE[sdk=*]" = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -120,6 +120,46 @@ class GameRepository: GameRepositoryProtocol {
         }
     }
     
+    // AGREGAR ESTE MÉTODO A TU GameRepository.swift
+    func getGames(page: Int, perPage: Int) async throws -> [Game] {
+        if useRemoteData {
+            do {
+                // Intentar hacer login si no está autenticado
+                try await remoteDataSource.login()
+                
+                // Obtener juegos de la API con paginación
+                let games = try await remoteDataSource.getGames(page: page, perPage: perPage)
+                
+                // Si es la primera página, guardar en local como backup
+                if page == 1 {
+                    localDataSource.saveGames(games)
+                }
+                
+                return games
+            } catch {
+                print("Error fetching page \(page) from API: \(error)")
+                // Si falla la API y es la primera página, usar datos locales
+                if page == 1 {
+                    return localDataSource.getGames()
+                } else {
+                    // Para páginas > 1, no hay fallback local
+                    throw error
+                }
+            }
+        } else {
+            // Para datos locales, simular paginación
+            let allGames = localDataSource.getGames()
+            let startIndex = (page - 1) * perPage
+            let endIndex = min(startIndex + perPage, allGames.count)
+            
+            guard startIndex < allGames.count else {
+                return []
+            }
+            
+            return Array(allGames[startIndex..<endIndex])
+        }
+    }
+    
     // MARK: - Configuration
     func setUseRemoteData(_ useRemote: Bool) {
         self.useRemoteData = useRemote

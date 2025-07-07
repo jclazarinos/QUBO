@@ -30,7 +30,7 @@ enum APIError: Error, LocalizedError {
 class APIService {
     static let shared = APIService()
     
-    private let baseURL = "http://stella.local/wp-json"
+    private let baseURL = "https://apiwpduck.duckdns.org/wp-json"
     private var authToken: String?
     
     private init() {}
@@ -70,9 +70,9 @@ class APIService {
     
     // MARK: - Games API
     func getAllGames() async throws -> [Game] {
-        guard let url = URL(string: "\(baseURL)/wp/v2/game") else {
-            throw APIError.invalidURL
-        }
+        guard let url = URL(string: "\(baseURL)/wp/v2/game?per_page=100") else {
+                throw APIError.invalidURL
+            }
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -88,16 +88,24 @@ class APIService {
         }
         
         do {
-            let apiGames = try JSONDecoder().decode([GameAPIResponse].self, from: data)
-            var games: [Game] = []
-            
-            for apiGame in apiGames {
-                if let game = try await convertAPIGameToGame(apiGame) {
-                    games.append(game)
+                let apiGames = try JSONDecoder().decode([GameAPIResponse].self, from: data)
+                
+                // 🔍 DEBUG: Cuántos juegos devuelve la API
+                print("🌐 API returned \(apiGames.count) games from WordPress")
+                
+                var games: [Game] = []
+                
+                for apiGame in apiGames {
+                    if let game = try await convertAPIGameToGame(apiGame) {
+                        games.append(game)
+                        print("✅ Converted game: \(game.title)")
+                    } else {
+                        print("❌ Failed to convert game: \(apiGame.title.rendered)")
+                    }
                 }
-            }
-            
-            return games
+                
+                print("🎮 Total games successfully converted: \(games.count)")
+                return games
         } catch {
             print("Decoding error: \(error)")
             throw APIError.decodingError
@@ -126,6 +134,55 @@ class APIService {
             let apiGame = try JSONDecoder().decode(GameAPIResponse.self, from: data)
             return try await convertAPIGameToGame(apiGame)
         } catch {
+            throw APIError.decodingError
+        }
+    }
+    // MARK: - Paginated Games API (AGREGAR AL FINAL DEL ARCHIVO)
+    func getGames(page: Int = 1, perPage: Int = 20) async throws -> [Game] {
+        guard let url = URL(string: "\(baseURL)/wp/v2/game?page=\(page)&per_page=\(perPage)&orderby=date&order=desc") else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.networkError
+        }
+        
+        // Log pagination info
+        if let totalPages = httpResponse.value(forHTTPHeaderField: "X-WP-TotalPages"),
+           let totalPosts = httpResponse.value(forHTTPHeaderField: "X-WP-Total") {
+            print("📊 Page \(page)/\(totalPages) - \(totalPosts) total games")
+        }
+        
+        guard httpResponse.statusCode == 200 else {
+            if httpResponse.statusCode == 400 && page > 1 {
+                print("📄 Page \(page) is out of range, no more games")
+                return []
+            }
+            throw APIError.serverError(httpResponse.statusCode)
+        }
+        
+        do {
+            let apiGames = try JSONDecoder().decode([GameAPIResponse].self, from: data)
+            print("🌐 Page \(page): API returned \(apiGames.count) games")
+            
+            var games: [Game] = []
+            
+            for apiGame in apiGames {
+                if let game = try await convertAPIGameToGame(apiGame) {
+                    games.append(game)
+                }
+            }
+            
+            print("🎮 Page \(page): \(games.count) games successfully converted")
+            return games
+            
+        } catch {
+            print("❌ Decoding error on page \(page): \(error)")
             throw APIError.decodingError
         }
     }

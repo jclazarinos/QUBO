@@ -1,6 +1,5 @@
 // MARK: - Presentation/Views/ContentView.swift
 import SwiftUI
-
 struct ContentView: View {
     @EnvironmentObject var viewModel: GamesViewModel
     @State private var showSidebar = false
@@ -43,16 +42,10 @@ struct ContentView: View {
                 }
             )
             
-            // Sidebar Overlay (slides in from left)
-            if showSidebar {
-                HStack(spacing: 0) {
-                    // Sidebar
-                    SidebarView(viewModel: viewModel)
-                        .frame(width: 280)
-                        .transition(.move(edge: .leading))
-                        .zIndex(1)
-                    
-                    // Overlay to close sidebar when tapping outside
+            // Sidebar Overlay - ANIMACIÓN MEJORADA
+            ZStack {
+                // Overlay background con fade
+                if showSidebar {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
                         .onTapGesture {
@@ -60,8 +53,24 @@ struct ContentView: View {
                                 showSidebar = false
                             }
                         }
+                        .transition(.opacity)
+                        .zIndex(0)
+                }
+                
+                // Sidebar con deslizamiento
+                if showSidebar {
+                    HStack {
+                        SidebarView(viewModel: viewModel)
+                            .frame(width: 280)
+                            .background(AppTheme.primaryColor)
+                        
+                        Spacer()
+                    }
+                    .transition(.move(edge: .leading))
+                    .zIndex(1)
                 }
             }
+            .zIndex(showSidebar ? 1 : -1)
         }
         .sheet(isPresented: $viewModel.showingAddGame) {
             AddGameView(viewModel: viewModel)
@@ -78,7 +87,6 @@ struct ContentView: View {
         }
     }
 }
-
 // MARK: - Preview
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

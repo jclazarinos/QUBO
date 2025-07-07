@@ -1,4 +1,4 @@
-// MARK: - Presentation/Views/Modals/GameDetailView.swift
+// MARK: - Presentation/Views/Modals/GameDetailView.swift - Estilo Steam
 import SwiftUI
 
 struct GameDetailView: View {
@@ -9,233 +9,50 @@ struct GameDetailView: View {
     @State private var showingDeleteAlert = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header with Retro Style - IMPROVED LAYOUT
-            ZStack {
-                // Background with pattern
-                AppTheme.primaryColor
-                    .overlay(
-                        // Subtle pixel pattern
-                        Rectangle()
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.white.opacity(0.1),
-                                        Color.clear
-                                    ]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
+        ScrollView {
+            VStack(spacing: 0) {
+                // 1. HERO IMAGE (estilo Steam)
+                HeroImageView(game: game, presentationMode: presentationMode, showingEditSheet: $showingEditSheet, showingDeleteAlert: $showingDeleteAlert)
                 
-                HStack(spacing: AppTheme.mediumSpacing) {
-                    // Close Button
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 18, weight: .bold, design: .monospaced))
-                            .foregroundColor(.white)
-                            .frame(width: 44, height: 44)
-                            .background(
-                                RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                                    .fill(Color.white.opacity(0.2))
-                            )
-                    }
-                    
-                    // Title - Centered with overlay for better layout
-                    Color.clear
-                        .frame(maxWidth: .infinity)
-                        .overlay(
-                            Text("GAME REVIEW")
-                                .font(AppTheme.title)
-                                .foregroundColor(.white)
-                                .textCase(.uppercase)
-                        )
-                    
-                    // Options Menu
-                    Menu {
-                        Button {
-                            showingEditSheet = true
-                        } label: {
-                            Label("EDIT GAME", systemImage: "pencil")
-                                .font(AppTheme.body)
-                        }
+                VStack(spacing: 20) {
+                    // 2. TÍTULO
+                    HStack {
+                        Text(game.title)
+                            .font(.system(size: 28, weight: .bold, design: .default))
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.leading)
                         
-                        Button(role: .destructive) {
-                            showingDeleteAlert = true
-                        } label: {
-                            Label("DELETE GAME", systemImage: "trash")
-                                .font(AppTheme.body)
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .font(.system(size: 18, weight: .bold, design: .monospaced))
-                            .foregroundColor(.white)
-                            .frame(width: 44, height: 44)
-                            .background(
-                                RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                                    .fill(Color.white.opacity(0.2))
-                            )
+                        Spacer()
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+                    
+                    // 3. DESCRIPCIÓN (JUSTIFICADA)
+                    if !game.description.cleanHTMLForDisplay().isEmpty {
+                        VStack {
+                            GameDescriptionText(text: game.description.cleanHTMLForDisplay())
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                    
+                    // 4. DATOS COMPACTOS (estilo Steam)
+                    GameStatsRow(game: game)
+                        .padding(.horizontal, 20)
+                    
+                    // 5. TRAILER (si existe)
+                    if game.hasTrailer {
+                        TrailerSection(game: game)
+                            .padding(.horizontal, 20)
+                    }
+                    
+                    // 6. REVIEW (último, con acordeón)
+                    ReviewAccordionView(game: game, showingEditSheet: $showingEditSheet)
+                        .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, AppTheme.largeSpacing)
-                .padding(.vertical, AppTheme.mediumSpacing)
-            }
-            .frame(height: 64) // Fixed height for consistency
-            
-            ScrollView {
-                VStack(spacing: AppTheme.largeSpacing) {
-                    // Game Header Card
-                    VStack(spacing: AppTheme.mediumSpacing) {
-                        HStack(spacing: AppTheme.mediumSpacing) {
-                            // Game Cover
-                            RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius)
-                                .fill(AppTheme.textColor)
-                                .frame(width: 100, height: 100)
-                                .overlay(
-                                    Group {
-                                        if game.coverImage.hasPrefix("http") {
-                                            AsyncImage(url: URL(string: game.coverImage)) { image in
-                                                image
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fill)
-                                            } placeholder: {
-                                                Image(systemName: "gamepad.fill")
-                                                    .font(.system(size: AppTheme.largeIconSize, design: .monospaced))
-                                                    .foregroundColor(.white)
-                                            }
-                                            .clipShape(RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius))
-                                        } else {
-                                            Image(systemName: game.coverImage)
-                                                .font(.system(size: AppTheme.largeIconSize, design: .monospaced))
-                                                .foregroundColor(.white)
-                                        }
-                                    }
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius)
-                                        .stroke(AppTheme.accentColor, lineWidth: 2)
-                                )
-                            
-                            // Game Info
-                            VStack(alignment: .leading, spacing: AppTheme.smallSpacing) {
-                                Text(game.title.uppercased())
-                                    .font(AppTheme.title)
-                                    .foregroundColor(AppTheme.primaryColor)
-                                    .lineLimit(2)
-                                
-                                Text(game.platform.uppercased())
-                                    .font(AppTheme.body)
-                                    .foregroundColor(AppTheme.accentColor)
-                                
-                                Text("COMPLETED: \(game.formattedDate.uppercased())")
-                                    .font(AppTheme.caption)
-                                    .foregroundColor(AppTheme.textColor)
-                                
-                                // Pixel-style Score
-                                HStack(spacing: 6) {
-                                    Text("SCORE:")
-                                        .font(AppTheme.caption)
-                                        .foregroundColor(AppTheme.textColor)
-                                    
-                                    HStack(spacing: 2) {
-                                        ForEach(1...10, id: \.self) { index in
-                                            Rectangle()
-                                                .fill(index <= game.score ? AppTheme.secondaryColor : AppTheme.textColor.opacity(0.3))
-                                                .frame(width: 8, height: 8)
-                                        }
-                                    }
-                                    
-                                    Text("\(game.score)/10")
-                                        .font(AppTheme.body)
-                                        .foregroundColor(AppTheme.secondaryColor)
-                                        .fontWeight(.bold)
-                                }
-                            }
-                            
-                            Spacer()
-                        }
-                    }
-                    .padding(AppTheme.mediumSpacing)
-                    .background(
-                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
-                            .fill(Color.white)
-                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
-                    )
-                    
-                    // Review Section
-                    VStack(spacing: AppTheme.mediumSpacing) {
-                        HStack {
-                            Text("MY REVIEW")
-                                .font(AppTheme.title)
-                                .foregroundColor(AppTheme.primaryColor)
-                                .textCase(.uppercase)
-                            
-                            Spacer()
-                            
-                            Button {
-                                showingEditSheet = true
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "pencil")
-                                        .font(.system(size: 12, design: .monospaced))
-                                    Text("EDIT")
-                                        .font(AppTheme.caption)
-                                }
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(AppTheme.accentColor)
-                                .cornerRadius(AppTheme.smallCornerRadius)
-                            }
-                        }
-                        
-                        Text(game.review)
-                            .font(.system(size: 16, weight: .regular, design: .default))
-                            .foregroundColor(AppTheme.textColor)
-                            .lineSpacing(6)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .padding(AppTheme.mediumSpacing)
-                    .background(
-                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
-                            .fill(Color.white)
-                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
-                    )
-                    
-                    // Game Stats Card
-                    VStack(spacing: AppTheme.mediumSpacing) {
-                        HStack {
-                            Text("GAME DATA")
-                                .font(AppTheme.title)
-                                .foregroundColor(AppTheme.primaryColor)
-                                .textCase(.uppercase)
-                            
-                            Spacer()
-                        }
-                        
-                        VStack(spacing: AppTheme.smallSpacing) {
-                            PixelInfoRow(title: "PLATFORM", value: game.platform.uppercased())
-                            PixelInfoRow(title: "COMPLETED", value: game.formattedDate.uppercased())
-                            PixelInfoRow(title: "RATING", value: "\(game.score)/10")
-                            PixelInfoRow(title: "GAME ID", value: "#\(String(format: "%04d", game.id))")
-                        }
-                    }
-                    .padding(AppTheme.mediumSpacing)
-                    .background(
-                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
-                            .fill(Color.white)
-                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
-                    )
-                }
-                .padding(.horizontal, AppTheme.largeSpacing)
-                .padding(.top, AppTheme.mediumSpacing)
                 .padding(.bottom, 40)
             }
-            .background(AppTheme.backgroundColor)
         }
+        .background(Color(.systemBackground))
         .sheet(isPresented: $showingEditSheet) {
             EditGameView(game: game, viewModel: viewModel)
         }
@@ -245,8 +62,7 @@ struct GameDetailView: View {
                 deleteGame()
             }
         } message: {
-            Text("Are you sure you want to delete '\(game.title.uppercased())'? This action cannot be undone.")
-                .font(AppTheme.body)
+            Text("Are you sure you want to delete '\(game.title)'?")
         }
     }
     
@@ -256,33 +72,338 @@ struct GameDetailView: View {
     }
 }
 
-// MARK: - Supporting Views
-struct PixelInfoRow: View {
-    let title: String
-    let value: String
+// MARK: - Hero Image Component
+struct HeroImageView: View {
+    let game: Game
+    let presentationMode: Binding<PresentationMode>
+    @Binding var showingEditSheet: Bool
+    @Binding var showingDeleteAlert: Bool
     
     var body: some View {
-        HStack {
-            Text(title)
-                .font(AppTheme.caption)
-                .foregroundColor(AppTheme.textColor)
-                .frame(width: 100, alignment: .leading)
+        ZStack {
+            // Background Image
+            AsyncImage(url: URL(string: game.coverImage)) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 300)
+                    .clipped()
+            } placeholder: {
+                Rectangle()
+                    .fill(AppTheme.primaryColor)
+                    .frame(height: 300)
+                    .overlay(
+                        Image(systemName: "gamecontroller.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.white.opacity(0.7))
+                    )
+            }
             
-            Rectangle()
-                .fill(AppTheme.textColor.opacity(0.3))
-                .frame(height: 1)
-                .frame(maxWidth: .infinity)
+            // Gradient overlay
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.black.opacity(0.6),
+                    Color.clear,
+                    Color.black.opacity(0.3)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            
+            // Header controls
+            VStack {
+                HStack {
+                    // Close button
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 40, height: 40)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
+                    }
+                    
+                    Spacer()
+                    
+                    // Menu button
+                    Menu {
+                        Button {
+                            showingEditSheet = true
+                        } label: {
+                            Label("Edit Game", systemImage: "pencil")
+                        }
+                        
+                        Button(role: .destructive) {
+                            showingDeleteAlert = true
+                        } label: {
+                            Label("Delete Game", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 40, height: 40)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+                
+                Spacer()
+            }
+        }
+        .frame(height: 300)
+    }
+}
+
+// MARK: - Game Stats Row (estilo Steam compacto)
+struct GameStatsRow: View {
+    let game: Game
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Score
+            StatItem(
+                icon: "star.fill",
+                value: "\(game.score)/10",
+                label: "Score",
+                color: .orange
+            )
+            
+            Divider()
+                .frame(height: 30)
+            
+            // Year
+            StatItem(
+                icon: "calendar",
+                value: game.formattedYear,
+                label: "Completed",
+                color: .blue
+            )
+            
+            Divider()
+                .frame(height: 30)
+            
+            // Platform
+            StatItem(
+                icon: "gamecontroller.fill",
+                value: game.platform,
+                label: "Platform",
+                color: .green
+            )
+            
+            Divider()
+                .frame(height: 30)
+            
+            // Status
+            StatItem(
+                icon: "checkmark.circle.fill",
+                value: game.gameStatus,
+                label: "Status",
+                color: .purple
+            )
+        }
+        .padding(.vertical, 16)
+        .padding(.horizontal, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
+}
+
+struct StatItem: View {
+    let icon: String
+    let value: String
+    let label: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(color)
             
             Text(value)
-                .font(AppTheme.body)
-                .foregroundColor(AppTheme.primaryColor)
-                .fontWeight(.bold)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.secondary)
+                .lineLimit(1)
         }
-        .padding(.horizontal, AppTheme.smallSpacing)
-        .padding(.vertical, AppTheme.smallSpacing)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Trailer Section
+struct TrailerSection: View {
+    let game: Game
+    @State private var showingTrailer = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("TRAILER")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+            }
+            
+            Button(action: {
+                showingTrailer = true
+            }) {
+                ZStack {
+                    // Thumbnail
+                    AsyncImage(url: URL(string: game.youtubeThumbnailURL ?? "")) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(16/9, contentMode: .fill)
+                            .clipped()
+                    } placeholder: {
+                        Rectangle()
+                            .fill(Color(.systemGray4))
+                            .aspectRatio(16/9, contentMode: .fill)
+                            .overlay(
+                                Image(systemName: "play.rectangle.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.white.opacity(0.7))
+                            )
+                    }
+                    
+                    // Play button overlay
+                    Color.black.opacity(0.3)
+                    
+                    Circle()
+                        .fill(Color.black.opacity(0.7))
+                        .frame(width: 60, height: 60)
+                        .overlay(
+                            Image(systemName: "play.fill")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .offset(x: 2) // Slight offset for visual balance
+                        )
+                }
+                .cornerRadius(12)
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .sheet(isPresented: $showingTrailer) {
+            if let videoId = game.youtubeVideoId {
+                YouTubePlayerView(videoId: videoId)
+            }
+        }
+    }
+}
+
+// MARK: - Review Accordion con texto justificado
+struct ReviewAccordionView: View {
+    let game: Game
+    @Binding var showingEditSheet: Bool
+    @State private var isExpanded = false
+    
+    private let previewLength = 150
+    
+    private var shouldShowAccordion: Bool {
+        game.cleanReview.count > previewLength && game.hasReview
+    }
+    
+    private var previewText: String {
+        if game.cleanReview.count <= previewLength {
+            return game.cleanReview
+        } else {
+            return String(game.cleanReview.prefix(previewLength)) + "..."
+        }
+    }
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text("MY REVIEW")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Button {
+                    showingEditSheet = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 12))
+                        Text("EDIT")
+                            .font(.system(size: 12, weight: .bold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.blue)
+                    .cornerRadius(6)
+                }
+            }
+            
+            if game.hasReview {
+                VStack(spacing: 12) {
+                    // TEXTO JUSTIFICADO APLICADO
+                    GameReviewText(text: isExpanded ? game.cleanReview : previewText)
+                        .animation(.easeInOut(duration: 0.3), value: isExpanded)
+                    
+                    if shouldShowAccordion {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                isExpanded.toggle()
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(isExpanded ? "SHOW LESS" : "READ MORE")
+                                    .font(.system(size: 14, weight: .semibold))
+                                
+                                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                                    .font(.system(size: 12, weight: .bold))
+                            }
+                            .foregroundColor(.blue)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.blue.opacity(0.1))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                                    )
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+            } else {
+                VStack(spacing: 12) {
+                    Image(systemName: "doc.text")
+                        .font(.system(size: 30))
+                        .foregroundColor(.secondary)
+                    
+                    Text("No review available")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                    
+                    Text("Tap EDIT to add your thoughts")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 20)
+            }
+        }
+        .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                .fill(AppTheme.backgroundColor)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground))
         )
     }
 }

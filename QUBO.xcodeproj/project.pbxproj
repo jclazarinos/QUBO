@@ -35,6 +35,10 @@
 		3CF90E602E0C8A860002C212 /* AccordionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF90E5F2E0C8A860002C212 /* AccordionSection.swift */; };
 		3CF90E632E0C8A980002C212 /* MenuButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF90E622E0C8A980002C212 /* MenuButton.swift */; };
 		579FACDD2E1BAD4200CB152B /* RemoteGameDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACDC2E1BAD4200CB152B /* RemoteGameDataSource.swift */; };
+		579FACE12E1BBF4F00CB152B /* Game+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACE02E1BBF4F00CB152B /* Game+Extension.swift */; };
+		579FACE32E1BBF6C00CB152B /* String+HTMLCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACE22E1BBF6C00CB152B /* String+HTMLCleaner.swift */; };
+		579FACE52E1BC5BB00CB152B /* JustifiedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACE42E1BC5BB00CB152B /* JustifiedText.swift */; };
+		579FACEF2E1BCE7200CB152B /* AVPlayerYouTubeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACEE2E1BCE7200CB152B /* AVPlayerYouTubeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +71,10 @@
 		3CF90E5F2E0C8A860002C212 /* AccordionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordionSection.swift; sourceTree = "<group>"; };
 		3CF90E622E0C8A980002C212 /* MenuButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuButton.swift; sourceTree = "<group>"; };
 		579FACDC2E1BAD4200CB152B /* RemoteGameDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteGameDataSource.swift; sourceTree = "<group>"; };
+		579FACE02E1BBF4F00CB152B /* Game+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Game+Extension.swift"; sourceTree = "<group>"; };
+		579FACE22E1BBF6C00CB152B /* String+HTMLCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+HTMLCleaner.swift"; sourceTree = "<group>"; };
+		579FACE42E1BC5BB00CB152B /* JustifiedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JustifiedText.swift; sourceTree = "<group>"; };
+		579FACEE2E1BCE7200CB152B /* AVPlayerYouTubeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayerYouTubeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				3CECBB002E15DC04002BE9F8 /* TopBar.swift */,
+				579FACEE2E1BCE7200CB152B /* AVPlayerYouTubeView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -287,6 +296,9 @@
 			children = (
 				3CF90E592E0C89B70002C212 /* Color+Extensions.swift */,
 				3CF90E5B2E0C89C30002C212 /* Font+Extensions.swift */,
+				579FACE02E1BBF4F00CB152B /* Game+Extension.swift */,
+				579FACE22E1BBF6C00CB152B /* String+HTMLCleaner.swift */,
+				579FACE42E1BC5BB00CB152B /* JustifiedText.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -377,17 +389,20 @@
 				3CF90E422E0C87820002C212 /* GameRepository.swift in Sources */,
 				3CF90E492E0C87F60002C212 /* AddGameView.swift in Sources */,
 				3CF90E1F2E0C846A0002C212 /* QUBOApp.swift in Sources */,
+				579FACE32E1BBF6C00CB152B /* String+HTMLCleaner.swift in Sources */,
 				3CF90E3A2E0C86DC0002C212 /* Enums.swift in Sources */,
 				3CF90E3C2E0C87080002C212 /* GameUseCases.swift in Sources */,
 				3CF90E602E0C8A860002C212 /* AccordionSection.swift in Sources */,
 				3CF90E362E0C86380002C212 /* GamesViewModel.swift in Sources */,
 				3CECBB012E15DC04002BE9F8 /* TopBar.swift in Sources */,
 				3CF90E4F2E0C88370002C212 /* GameGroupView.swift in Sources */,
+				579FACE52E1BC5BB00CB152B /* JustifiedText.swift in Sources */,
 				3CF90E512E0C88430002C212 /* GameCardView.swift in Sources */,
 				3CF90E582E0C89A40002C212 /* Theme.swift in Sources */,
 				3CF90E442E0C87950002C212 /* LocalGameDataSource.swift in Sources */,
 				3CECBAFE2E15CC61002BE9F8 /* EditGameView.swift in Sources */,
 				3CF90E3E2E0C87420002C212 /* GameRepositoryProtocol.swift in Sources */,
+				579FACEF2E1BCE7200CB152B /* AVPlayerYouTubeView.swift in Sources */,
 				3CF90E4B2E0C880E0002C212 /* GameDetailView.swift in Sources */,
 				3CECBAFC2E15C188002BE9F8 /* APIService.swift in Sources */,
 				3CF90E5A2E0C89B70002C212 /* Color+Extensions.swift in Sources */,
@@ -395,6 +410,7 @@
 				3CF90E4D2E0C88250002C212 /* MainContentView.swift in Sources */,
 				579FACDD2E1BAD4200CB152B /* RemoteGameDataSource.swift in Sources */,
 				3CF90E532E0C884E0002C212 /* GameListItemView.swift in Sources */,
+				579FACE12E1BBF4F00CB152B /* Game+Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

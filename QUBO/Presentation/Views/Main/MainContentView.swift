@@ -5,19 +5,60 @@ struct MainContentView: View {
     @ObservedObject var viewModel: GamesViewModel
     
     var body: some View {
-        // Games Content (removed header since it's now in TopBar)
         ScrollView {
             LazyVStack(spacing: 20) {
+                // Debug info (opcional - puedes removerlo después)
+                if viewModel.games.count > 0 {
+                    HStack {
+                        Text("🎮 \(viewModel.games.count) games loaded")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Spacer()
+                        
+                        if viewModel.isLoadingMore {
+                            HStack(spacing: 4) {
+                                ProgressView()
+                                    .scaleEffect(0.6)
+                                Text("Loading...")
+                                    .font(.caption2)
+                            }
+                            .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, AppTheme.largeSpacing)
+                }
+                
                 if viewModel.viewType == .icons {
                     // Group by letter
                     ForEach(viewModel.groupedGames, id: \.0) { letter, games in
                         GameGroupView(letter: letter, games: games, viewModel: viewModel)
+                            .onAppear {
+                                // 🚀 Trigger lazy loading para modo icons
+                                checkForLoadMoreInGroups(currentLetter: letter)
+                            }
                     }
                 } else {
                     // List view
                     ForEach(viewModel.sortedGames) { game in
                         GameListItemView(game: game, viewModel: viewModel)
+                            .onAppear {
+                                // 🚀 Trigger lazy loading para modo lista
+                                checkForLoadMore(game: game)
+                            }
                     }
+                }
+                
+                // Loading indicator para más contenido
+                if viewModel.isLoadingMore {
+                    HStack(spacing: 12) {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("Loading more games...")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 16)
                 }
                 
                 // Empty state if no games
@@ -28,11 +69,38 @@ struct MainContentView: View {
             }
             .padding(.horizontal, AppTheme.largeSpacing)
             .padding(.top, 20)
-            .padding(.bottom, 40) // Extra bottom padding for safe area
+            .padding(.bottom, 40)
         }
         .background(AppTheme.backgroundColor)
         .refreshable {
             viewModel.refreshGames()
+        }
+    }
+    
+    // MARK: - Lazy Loading Logic
+    
+    /// Detecta cuándo cargar más contenido en modo lista
+    private func checkForLoadMore(game: Game) {
+        guard let currentIndex = viewModel.sortedGames.firstIndex(where: { $0.id == game.id }) else {
+            return
+        }
+        
+        let totalGames = viewModel.sortedGames.count
+        let threshold = max(1, totalGames - 3) // Cargar cuando falten 3 o menos
+        
+        if currentIndex >= threshold {
+            print("🎯 Trigger load more: game \(currentIndex + 1)/\(totalGames)")
+            viewModel.loadMoreGames()
+        }
+    }
+    
+    /// Detecta cuándo cargar más contenido en modo grupos
+    private func checkForLoadMoreInGroups(currentLetter: String) {
+        let groupedGames = viewModel.groupedGames
+        if let lastGroup = groupedGames.last,
+           lastGroup.0 == currentLetter {
+            print("🎯 Trigger load more: last group '\(currentLetter)' appeared")
+            viewModel.loadMoreGames()
         }
     }
 }

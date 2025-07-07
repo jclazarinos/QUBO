@@ -7,15 +7,25 @@ struct GameListItemView: View {
     
     var body: some View {
         HStack(spacing: AppTheme.mediumSpacing) {
-            // Cover Image
-            RoundedRectangle(cornerRadius: 6)
-                .fill(AppTheme.textColor)
-                .frame(width: 60, height: 60)
-                .overlay(
-                    Image(systemName: game.coverImage)
-                        .font(.system(size: 24))
-                        .foregroundColor(.white)
-                )
+            // Cover Image - ACTUALIZADA
+            AsyncImage(url: URL(string: game.coverImage)) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 60, height: 60)
+                    .clipped()
+                    .cornerRadius(6)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(AppTheme.textColor)
+                    .frame(width: 60, height: 60)
+                    .overlay(
+                        Image(systemName: "gamecontroller.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.white)
+                    )
+            }
+            .frame(width: 60, height: 60)
             
             // Game Info
             VStack(alignment: .leading, spacing: 4) {

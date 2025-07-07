@@ -8,15 +8,16 @@ class GameUseCases {
         self.repository = repository
     }
     
-    func getGames(page: Int = 1, perPage: Int = 20) async throws -> [Game] {
-        print("🎯 UseCase: Getting games - Page \(page), Per page: \(perPage)")
-        return try await repository.getGames(page: page, perPage: perPage)
+    // MÉTODO PRINCIPAL con sortOption
+    func getGames(page: Int = 1, perPage: Int = 20, sortOption: SortOption = .alphabetical) async throws -> [Game] {
+        print("🎯 UseCase: Getting games - Page \(page), Per page: \(perPage), Sort: \(sortOption.rawValue)")
+        return try await repository.getGames(page: page, perPage: perPage, sortOption: sortOption)
     }
-
-    // Modificar el método existente getAllGames para usar paginación
+    
+    // Método legacy para compatibilidad
     func getAllGames() async throws -> [Game] {
         print("⚠️ getAllGames() - using paginated version with large page size")
-        return try await repository.getGames(page: 1, perPage: 100)
+        return try await repository.getGames(page: 1, perPage: 100, sortOption: .alphabetical)
     }
     
     func getSortedGames(by sortOption: SortOption) async throws -> [Game] {

@@ -3,7 +3,7 @@ import Foundation
 
 protocol GameRepositoryProtocol {
     func getAllGames() async throws -> [Game]
-    func getGames(page: Int, perPage: Int) async throws -> [Game]
+    func getGames(page: Int, perPage: Int, sortOption: SortOption) async throws -> [Game] // CAMBIAR ESTA LÍNEA
     func addGame(_ game: Game) async throws -> Game
     func updateGame(_ game: Game) async throws -> Game
     func deleteGame(withId id: Int) async throws
@@ -14,7 +14,7 @@ import Foundation
 
 protocol RemoteGameDataSourceProtocol {
     func getAllGames() async throws -> [Game]
-    func getGames(page: Int, perPage: Int) async throws -> [Game]
+    func getGames(page: Int, perPage: Int, sortOption: SortOption) async throws -> [Game] // CAMBIAR ESTA LÍNEA
     func getGameById(_ id: Int) async throws -> Game?
     func createGame(_ game: Game) async throws -> Game
     func updateGame(_ game: Game) async throws -> Game

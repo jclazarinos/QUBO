@@ -123,7 +123,7 @@ class GamesViewModel: ObservableObject {
                 print("📱 Initial load: \(fetchedGames.count) games loaded")
                 
                 self.games = fetchedGames
-                self.hasMorePages = fetchedGames.count == gamesPerPage
+                self.hasMorePages = true // Siempre asumir que hay más al inicio
                 self.isLoading = false
                 
                 print("🔄 Has more pages: \(hasMorePages)")
@@ -151,7 +151,7 @@ class GamesViewModel: ObservableObject {
                 print("📦 Loaded \(newGames.count) more games from page \(currentPage)")
                 
                 self.games.append(contentsOf: newGames)
-                self.hasMorePages = newGames.count == gamesPerPage
+                self.hasMorePages = newGames.count > 0 // Solo parar si no llegan más juegos
                 self.isLoadingMore = false
                 
                 print("🎮 Total games now: \(games.count)")

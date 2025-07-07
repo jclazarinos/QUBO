@@ -138,8 +138,11 @@ class APIService {
         }
     }
     // MARK: - Paginated Games API (AGREGAR AL FINAL DEL ARCHIVO)
-    func getGames(page: Int = 1, perPage: Int = 20) async throws -> [Game] {
-        guard let url = URL(string: "\(baseURL)/wp/v2/game?page=\(page)&per_page=\(perPage)&orderby=date&order=desc") else {
+    func getGames(page: Int = 1, perPage: Int = 20, sortOption: SortOption = .alphabetical) async throws -> [Game] {
+        // Convertir SortOption a parámetros de WordPress
+        let (orderBy, order) = getSortParameters(for: sortOption)
+        
+        guard let url = URL(string: "\(baseURL)/wp/v2/game?page=\(page)&per_page=\(perPage)&orderby=\(orderBy)&order=\(order)") else {
             throw APIError.invalidURL
         }
         
@@ -155,7 +158,7 @@ class APIService {
         // Log pagination info
         if let totalPages = httpResponse.value(forHTTPHeaderField: "X-WP-TotalPages"),
            let totalPosts = httpResponse.value(forHTTPHeaderField: "X-WP-Total") {
-            print("📊 Page \(page)/\(totalPages) - \(totalPosts) total games")
+            print("📊 Page \(page)/\(totalPages) - \(totalPosts) total games (sorted by \(sortOption.rawValue))")
         }
         
         guard httpResponse.statusCode == 200 else {
@@ -184,6 +187,20 @@ class APIService {
         } catch {
             print("❌ Decoding error on page \(page): \(error)")
             throw APIError.decodingError
+        }
+    }
+
+    // AGREGAR este método helper:
+    private func getSortParameters(for sortOption: SortOption) -> (orderBy: String, order: String) {
+        switch sortOption {
+        case .alphabetical:
+            return ("title", "asc")
+        case .score:
+            return ("meta_value_num", "desc") // Asumiendo que score es meta field
+        case .year:
+            return ("date", "desc")
+        case .platform:
+            return ("meta_value", "asc") // Asumiendo que platform es meta field
         }
     }
     
@@ -317,28 +334,32 @@ class APIService {
         }
     }
     
-    // MARK: - Helper Methods
     private func convertAPIGameToGame(_ apiGame: GameAPIResponse) async throws -> Game? {
-        guard let acf = apiGame.acf.toGame(id: apiGame.id, title: apiGame.title.rendered) else {
+        // Extraer datos básicos del ACF
+        guard let title = apiGame.acf.title,
+              let anoFinalizado = apiGame.acf.anoFinalizado,
+              let date = DateFormatter.apiDateFormatter.date(from: anoFinalizado) else {
+            print("❌ Missing required fields for game: \(apiGame.title.rendered)")
             return nil
         }
         
         // Obtener URL de la imagen si existe
-        var imageUrl = "gamecontroller.fill" // Default icon
-        
-        // Obtener el ID de la imagen usando el helper
+        var imageUrl = "gamecontroller.fill"
         if let imageId = apiGame.acf.imageId {
             imageUrl = try await getMediaURL(for: imageId) ?? "gamecontroller.fill"
         }
         
         return Game(
             id: apiGame.id,
-            title: acf.title,
-            platform: acf.platform,
-            completionDate: acf.completionDate,
-            score: acf.score,
+            title: title,
+            platform: apiGame.acf.platform?.first ?? "Unknown",
+            completionDate: date,
+            score: apiGame.acf.score ?? 0,
             coverImage: imageUrl,
-            review: acf.review
+            review: apiGame.acf.review ?? "",
+            description: apiGame.acf.description ?? "",
+            trailer: apiGame.acf.trailer,
+            gameStatus: apiGame.acf.gamestatus ?? "Completed"
         )
     }
     

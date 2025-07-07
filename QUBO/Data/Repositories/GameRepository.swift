@@ -120,15 +120,15 @@ class GameRepository: GameRepositoryProtocol {
         }
     }
     
-    // AGREGAR ESTE MÉTODO A TU GameRepository.swift
-    func getGames(page: Int, perPage: Int) async throws -> [Game] {
+    // REEMPLAZAR tu método getGames() existente con este:
+    func getGames(page: Int, perPage: Int, sortOption: SortOption = .alphabetical) async throws -> [Game] {
         if useRemoteData {
             do {
                 // Intentar hacer login si no está autenticado
                 try await remoteDataSource.login()
                 
-                // Obtener juegos de la API con paginación
-                let games = try await remoteDataSource.getGames(page: page, perPage: perPage)
+                // Obtener juegos de la API con paginación y ordenamiento
+                let games = try await remoteDataSource.getGames(page: page, perPage: perPage, sortOption: sortOption)
                 
                 // Si es la primera página, guardar en local como backup
                 if page == 1 {
@@ -147,16 +147,30 @@ class GameRepository: GameRepositoryProtocol {
                 }
             }
         } else {
-            // Para datos locales, simular paginación
+            // Para datos locales, simular paginación con ordenamiento
             let allGames = localDataSource.getGames()
-            let startIndex = (page - 1) * perPage
-            let endIndex = min(startIndex + perPage, allGames.count)
             
-            guard startIndex < allGames.count else {
+            // Aplicar ordenamiento localmente
+            let sortedGames: [Game]
+            switch sortOption {
+            case .alphabetical:
+                sortedGames = allGames.sorted { $0.title < $1.title }
+            case .score:
+                sortedGames = allGames.sorted { $0.score > $1.score }
+            case .year:
+                sortedGames = allGames.sorted { $0.completionDate > $1.completionDate }
+            case .platform:
+                sortedGames = allGames.sorted { $0.platform < $1.platform }
+            }
+            
+            let startIndex = (page - 1) * perPage
+            let endIndex = min(startIndex + perPage, sortedGames.count)
+            
+            guard startIndex < sortedGames.count else {
                 return []
             }
             
-            return Array(allGames[startIndex..<endIndex])
+            return Array(sortedGames[startIndex..<endIndex])
         }
     }
     

@@ -21,12 +21,12 @@ class RemoteGameDataSource: RemoteGameDataSourceProtocol {
         return try await apiService.getGames(page: page, perPage: perPage, sortOption: sortOption)
     }
     
-    func createGame(_ game: Game) async throws -> Game {
-        return try await apiService.createGame(game)
+    func createGame(_ game: Game, mediaId: Int? = nil) async throws -> Game {
+        return try await apiService.createGame(game, mediaId: mediaId)
     }
-    
-    func updateGame(_ game: Game) async throws -> Game {
-        return try await apiService.updateGame(game)
+
+    func updateGame(_ game: Game, mediaId: Int? = nil) async throws -> Game {
+        return try await apiService.updateGame(game, mediaId: mediaId)
     }
     
     func deleteGame(withId id: Int) async throws {

@@ -43,6 +43,7 @@
 		579FACF32E1BDDA600CB152B /* ImageURLField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACF22E1BDDA600CB152B /* ImageURLField.swift */; };
 		579FACF52E1BE25100CB152B /* FormField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACF42E1BE25100CB152B /* FormField.swift */; };
 		579FACF72E1BE31800CB152B /* TextField+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACF62E1BE31800CB152B /* TextField+Extensions.swift */; };
+		579FACF92E1BF18D00CB152B /* EnhancedImageField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACF82E1BF18D00CB152B /* EnhancedImageField.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -83,6 +84,7 @@
 		579FACF22E1BDDA600CB152B /* ImageURLField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageURLField.swift; sourceTree = "<group>"; };
 		579FACF42E1BE25100CB152B /* FormField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormField.swift; sourceTree = "<group>"; };
 		579FACF62E1BE31800CB152B /* TextField+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextField+Extensions.swift"; sourceTree = "<group>"; };
+		579FACF82E1BF18D00CB152B /* EnhancedImageField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedImageField.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +122,7 @@
 				579FACF02E1BD86600CB152B /* PlatformPickerView.swift */,
 				579FACF22E1BDDA600CB152B /* ImageURLField.swift */,
 				579FACF42E1BE25100CB152B /* FormField.swift */,
+				579FACF82E1BF18D00CB152B /* EnhancedImageField.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -394,6 +397,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CF90E5C2E0C89C30002C212 /* Font+Extensions.swift in Sources */,
+				579FACF92E1BF18D00CB152B /* EnhancedImageField.swift in Sources */,
 				3CF90E212E0C846A0002C212 /* ContentView.swift in Sources */,
 				3CF90E632E0C8A980002C212 /* MenuButton.swift in Sources */,
 				3CF90E5E2E0C8A790002C212 /* SidebarView.swift in Sources */,

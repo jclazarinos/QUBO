@@ -16,8 +16,10 @@ struct AddGameView: View {
     @State private var description = ""
     @State private var trailer = ""
     @State private var gameStatus = "Finalizado"
-    @State private var coverImageURL = "" // NUEVO CAMPO AGREGADO
-    
+    @State private var imageSource: ImageSource = .none
+    @State private var uploadedMediaId: Int?
+    @State private var finalImageURL: String = ""
+
     // Estado para platform picker
     @State private var showingPlatformPicker = false
     @State private var availablePlatforms: [String] = []
@@ -214,8 +216,12 @@ struct AddGameView: View {
                                 )
                         }
                         
-                        // COVER IMAGE URL - NUEVO CAMPO
-                        ImageURLField(title: "COVER IMAGE", imageURL: $coverImageURL)
+                        EnhancedImageField(
+                            title: "COVER IMAGE",
+                            imageSource: $imageSource,
+                            uploadedMediaId: $uploadedMediaId,
+                            finalImageURL: $finalImageURL
+                        )
                     }
                     .padding(.horizontal, AppTheme.largeSpacing)
                     .padding(.top, 20)
@@ -236,8 +242,13 @@ struct AddGameView: View {
     
     // MARK: - Actions
     private func saveGame() {
-        // Usar URL de imagen si está disponible, sino usar ícono por defecto
-        let finalCoverImage = coverImageURL.isEmpty ? "gamepad.fill" : coverImageURL
+        // Determinar la imagen final
+        let finalCoverImage: String
+        if !finalImageURL.isEmpty {
+            finalCoverImage = finalImageURL
+        } else {
+            finalCoverImage = "gamepad.fill"
+        }
         
         let newGame = Game(
             title: title,
@@ -251,7 +262,8 @@ struct AddGameView: View {
             gameStatus: gameStatus
         )
         
-        viewModel.addGame(newGame)
+        // Pasar mediaId si está disponible
+        viewModel.addGame(newGame, mediaId: uploadedMediaId)
         presentationMode.wrappedValue.dismiss()
     }
 }

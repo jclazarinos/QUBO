@@ -41,12 +41,12 @@ class GameUseCases {
         return grouped.sorted { $0.key < $1.key }
     }
     
-    func addGame(_ game: Game) async throws -> Game {
-        return try await repository.addGame(game)
+    func addGame(_ game: Game, mediaId: Int? = nil) async throws -> Game {
+        return try await repository.addGame(game, mediaId: mediaId)
     }
-    
-    func updateGame(_ game: Game) async throws -> Game {
-        return try await repository.updateGame(game)
+
+    func updateGame(_ game: Game, mediaId: Int? = nil) async throws -> Game {
+        return try await repository.updateGame(game, mediaId: mediaId)
     }
     
     func deleteGame(withId id: Int) async throws {

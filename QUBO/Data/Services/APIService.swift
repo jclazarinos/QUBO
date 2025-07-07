@@ -31,7 +31,10 @@ class APIService {
     static let shared = APIService()
     
     private let baseURL = "https://apiwpduck.duckdns.org/wp-json"
-    private var authToken: String?
+    private var _authToken: String?
+    var authToken: String? {
+        return _authToken
+    }
     
     private init() {}
     
@@ -61,7 +64,7 @@ class APIService {
         
         do {
             let loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
-            self.authToken = loginResponse.token
+            self._authToken = loginResponse.token
             return loginResponse
         } catch {
             throw APIError.decodingError
@@ -204,8 +207,8 @@ class APIService {
         }
     }
     
-    func createGame(_ game: Game) async throws -> Game {
-        guard let token = authToken else {
+    func createGame(_ game: Game, mediaId: Int? = nil) async throws -> Game {
+        guard let token = _authToken else {
             throw APIError.authenticationFailed
         }
         
@@ -213,7 +216,7 @@ class APIService {
             throw APIError.invalidURL
         }
         
-        let createRequest = game.toCreateRequest()
+        let createRequest = game.toCreateRequest(mediaId: mediaId)
         let requestData = try JSONEncoder().encode(createRequest)
         
         var request = URLRequest(url: url)
@@ -240,8 +243,8 @@ class APIService {
         }
     }
     
-    func updateGame(_ game: Game) async throws -> Game {
-        guard let token = authToken else {
+    func updateGame(_ game: Game, mediaId: Int? = nil) async throws -> Game {
+        guard let token = _authToken else {
             throw APIError.authenticationFailed
         }
         
@@ -249,7 +252,7 @@ class APIService {
             throw APIError.invalidURL
         }
         
-        let updateRequest = game.toCreateRequest()
+        let updateRequest = game.toCreateRequest(mediaId: mediaId)
         let requestData = try JSONEncoder().encode(updateRequest)
         
         var request = URLRequest(url: url)
@@ -277,7 +280,7 @@ class APIService {
     }
     
     func deleteGame(withId id: Int) async throws {
-        guard let token = authToken else {
+        guard let token = _authToken else {
             throw APIError.authenticationFailed
         }
         
@@ -345,8 +348,14 @@ class APIService {
         
         // Obtener URL de la imagen si existe
         var imageUrl = "gamecontroller.fill"
+
         if let imageId = apiGame.acf.imageId {
+            // Es un media_id de WordPress
             imageUrl = try await getMediaURL(for: imageId) ?? "gamecontroller.fill"
+        } else if let directURL = apiGame.acf.image?.value as? String,
+                  directURL.hasPrefix("http") {
+            // Es una URL directa
+            imageUrl = directURL
         }
         
         return Game(

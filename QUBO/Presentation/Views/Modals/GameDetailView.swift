@@ -2,11 +2,19 @@
 import SwiftUI
 
 struct GameDetailView: View {
+    let game: Game // ← AGREGAR: Referencia original
     @State private var currentGame: Game
     @ObservedObject var viewModel: GamesViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var showingEditSheet = false
     @State private var showingDeleteAlert = false
+    
+    // AGREGAR el init correcto:
+    init(game: Game, viewModel: GamesViewModel) {
+        self.game = game
+        self.viewModel = viewModel
+        self._currentGame = State(initialValue: game)
+    }
     
     var body: some View {
         ScrollView {
@@ -70,28 +78,23 @@ struct GameDetailView: View {
                 deleteGame()
             }
         } message: {
-            Text("Are you sure you want to delete '\(game.title)'?")
+            Text("Are you sure you want to delete '\(currentGame.title)'?") // ← CAMBIAR a currentGame
+        }
+    }
+    
+    // AGREGAR este método helper:
+    private func updateCurrentGame() {
+        if let updatedGame = viewModel.games.first(where: { $0.id == game.id }) {
+            currentGame = updatedGame
         }
     }
     
     private func deleteGame() {
-        viewModel.deleteGame(withId: game.id)
+        viewModel.deleteGame(withId: currentGame.id) // ← CAMBIAR a currentGame
         presentationMode.wrappedValue.dismiss()
     }
 }
-// AGREGAR este método helper:
-private func updateCurrentGame() {
-    if let updatedGame = viewModel.games.first(where: { $0.id == game.id }) {
-        currentGame = updatedGame
-    }
-}
 
-// CAMBIAR el init para inicializar currentGame:
-init(game: Game, viewModel: GamesViewModel) {
-    self.game = game
-    self.viewModel = viewModel
-    self._currentGame = State(initialValue: game)
-}
 // MARK: - Hero Image Component
 struct HeroImageView: View {
     let game: Game
@@ -101,19 +104,31 @@ struct HeroImageView: View {
     
     var body: some View {
         ZStack {
-            // Background Image
-            AsyncImage(url: URL(string: game.coverImage)) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(height: 300)
-                    .clipped()
-            } placeholder: {
+            // Background Image - ARREGLADO para manejar íconos
+            if game.coverImage.hasPrefix("http") {
+                AsyncImage(url: URL(string: game.coverImage)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 300)
+                        .clipped()
+                } placeholder: {
+                    Rectangle()
+                        .fill(AppTheme.primaryColor)
+                        .frame(height: 300)
+                        .overlay(
+                            Image(systemName: "gamecontroller.fill")
+                                .font(.system(size: 60))
+                                .foregroundColor(.white.opacity(0.7))
+                        )
+                }
+            } else {
+                // Es un ícono SF Symbol
                 Rectangle()
                     .fill(AppTheme.primaryColor)
                     .frame(height: 300)
                     .overlay(
-                        Image(systemName: "gamecontroller.fill")
+                        Image(systemName: game.coverImage)
                             .font(.system(size: 60))
                             .foregroundColor(.white.opacity(0.7))
                     )

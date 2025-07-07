@@ -34,11 +34,11 @@ class GameRepository: GameRepositoryProtocol {
         }
     }
     
-    func addGame(_ game: Game) async throws -> Game {
+    func addGame(_ game: Game, mediaId: Int? = nil) async throws -> Game {
         if useRemoteData {
             do {
-                // Crear en la API
-                let createdGame = try await remoteDataSource.createGame(game)
+                // Crear en la API con mediaId
+                let createdGame = try await remoteDataSource.createGame(game, mediaId: mediaId)
                 
                 // Actualizar datos locales
                 var games = localDataSource.getGames()
@@ -61,12 +61,12 @@ class GameRepository: GameRepositoryProtocol {
             return game
         }
     }
-    
-    func updateGame(_ game: Game) async throws -> Game {
+
+    func updateGame(_ game: Game, mediaId: Int? = nil) async throws -> Game {
         if useRemoteData {
             do {
-                // Actualizar en la API
-                let updatedGame = try await remoteDataSource.updateGame(game)
+                // Actualizar en la API con mediaId
+                let updatedGame = try await remoteDataSource.updateGame(game, mediaId: mediaId)
                 
                 // Actualizar datos locales
                 var games = localDataSource.getGames()

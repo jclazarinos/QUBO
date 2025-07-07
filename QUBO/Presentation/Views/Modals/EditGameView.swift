@@ -17,11 +17,13 @@ struct EditGameView: View {
     @State private var description: String
     @State private var trailer: String
     @State private var gameStatus: String
-    @State private var coverImageURL: String
     
     // Estado para UI
     @State private var showingPlatformPicker = false
     
+    @State private var imageSource: ImageSource = .none
+    @State private var uploadedMediaId: Int?
+    @State private var finalImageURL: String
     // Platform options (lista completa)
     private let platformOptions = [
         "Amiga", "Android", "Arcade", "Arcade Sega NAOMI", "Atari 2600",
@@ -53,7 +55,7 @@ struct EditGameView: View {
         _description = State(initialValue: game.description)
         _trailer = State(initialValue: game.trailer ?? "")
         _gameStatus = State(initialValue: game.gameStatus)
-        _coverImageURL = State(initialValue: game.coverImage.hasPrefix("http") ? game.coverImage : "")
+        _finalImageURL = State(initialValue: game.coverImage.hasPrefix("http") ? game.coverImage : "")
     }
     
     var body: some View {
@@ -221,8 +223,12 @@ struct EditGameView: View {
                                 )
                         }
                         
-                        // COVER IMAGE URL
-                            ImageURLField(title: "COVER IMAGE", imageURL: $coverImageURL)
+                        EnhancedImageField(
+                            title: "COVER IMAGE",
+                            imageSource: $imageSource,
+                            uploadedMediaId: $uploadedMediaId,
+                            finalImageURL: $finalImageURL
+                        )
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
@@ -244,8 +250,8 @@ struct EditGameView: View {
     private func saveGame() {
         // Determinar la imagen final
         let finalCoverImage: String
-        if !coverImageURL.isEmpty {
-            finalCoverImage = coverImageURL
+        if !finalImageURL.isEmpty {
+            finalCoverImage = finalImageURL
         } else if originalGame.coverImage.hasPrefix("http") {
             finalCoverImage = "gamepad.fill" // Si se borró la URL, usar ícono
         } else {
@@ -265,7 +271,8 @@ struct EditGameView: View {
             gameStatus: gameStatus
         )
         
-        viewModel.updateGame(updatedGame)
+        // Pasar mediaId si está disponible
+        viewModel.updateGame(updatedGame, mediaId: uploadedMediaId)
         presentationMode.wrappedValue.dismiss()
     }
 }

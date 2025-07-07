@@ -161,11 +161,8 @@ extension GameAPIResponse.GameACF {
 }
 
 extension Game {
-    func toCreateRequest() -> CreateGameRequest {
+    func toCreateRequest(mediaId: Int? = nil) -> CreateGameRequest {
         let dateString = DateFormatter.apiDateFormatter.string(from: self.completionDate)
-        
-        // Determinar imageId si la coverImage es una URL
-        let imageId: Int? = nil // Por ahora nil, se puede mejorar después
         
         return CreateGameRequest(
             title: self.title,
@@ -173,7 +170,7 @@ extension Game {
             content: self.review, // WordPress content
             acf: CreateGameRequest.GameACFRequest(
                 title: self.title,
-                image: imageId, // Se asignará después de subir la imagen si es necesario
+                image: mediaId, // ✅ USAR EL MEDIA_ID PASADO COMO PARÁMETRO
                 gamestatus: self.gameStatus, // ✅ CORREGIDO: Usar el campo real
                 platform: [self.platform],
                 description: self.description, // ✅ CORREGIDO: Usar description real

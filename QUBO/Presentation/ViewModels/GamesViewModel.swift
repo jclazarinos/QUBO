@@ -54,14 +54,13 @@ class GamesViewModel: ObservableObject {
         return games.count
     }
     
-    // MARK: - Game Operations
-    func addGame(_ game: Game) {
+    func addGame(_ game: Game, mediaId: Int? = nil) {
         isLoading = true
         errorMessage = nil
         
         Task {
             do {
-                let createdGame = try await gameUseCases.addGame(game)
+                let createdGame = try await gameUseCases.addGame(game, mediaId: mediaId)
                 // No need for MainActor.run since we're already on MainActor
                 self.games.append(createdGame)
                 self.isLoading = false
@@ -72,14 +71,14 @@ class GamesViewModel: ObservableObject {
             }
         }
     }
-    
-    func updateGame(_ game: Game) {
+
+    func updateGame(_ game: Game, mediaId: Int? = nil) {
         isLoading = true
         errorMessage = nil
         
         Task {
             do {
-                let updatedGame = try await gameUseCases.updateGame(game)
+                let updatedGame = try await gameUseCases.updateGame(game, mediaId: mediaId)
                 if let index = self.games.firstIndex(where: { $0.id == updatedGame.id }) {
                     self.games[index] = updatedGame
                 }

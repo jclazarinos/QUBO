@@ -164,17 +164,20 @@ extension Game {
     func toCreateRequest() -> CreateGameRequest {
         let dateString = DateFormatter.apiDateFormatter.string(from: self.completionDate)
         
+        // Determinar imageId si la coverImage es una URL
+        let imageId: Int? = nil // Por ahora nil, se puede mejorar después
+        
         return CreateGameRequest(
             title: self.title,
             status: "publish",
-            content: self.review,
+            content: self.review, // WordPress content
             acf: CreateGameRequest.GameACFRequest(
                 title: self.title,
-                image: nil, // Se asignará después de subir la imagen
-                gamestatus: "Finalizado",
+                image: imageId, // Se asignará después de subir la imagen si es necesario
+                gamestatus: self.gameStatus, // ✅ CORREGIDO: Usar el campo real
                 platform: [self.platform],
-                description: self.review,
-                trailer: nil,
+                description: self.description, // ✅ CORREGIDO: Usar description real
+                trailer: self.trailer, // ✅ CORREGIDO: Usar trailer real (puede ser nil)
                 review: self.review,
                 score: self.score,
                 anoFinalizado: dateString

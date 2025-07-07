@@ -6,12 +6,39 @@ struct EditGameView: View {
     @ObservedObject var viewModel: GamesViewModel
     @Environment(\.presentationMode) var presentationMode
     
+    // Campos básicos
     @State private var title: String
     @State private var platform: String
     @State private var completionDate: Date
     @State private var score: Int
     @State private var review: String
-    @State private var showingImagePicker = false
+    
+    // Nuevos campos
+    @State private var description: String
+    @State private var trailer: String
+    @State private var gameStatus: String
+    @State private var coverImageURL: String
+    
+    // Estado para UI
+    @State private var showingPlatformPicker = false
+    
+    // Platform options (lista completa)
+    private let platformOptions = [
+        "Amiga", "Android", "Arcade", "Arcade Sega NAOMI", "Atari 2600",
+        "Game & Watch", "Microsoft Xbox 360", "MSX", "Neo Geo", "Neo Geo CD",
+        "Neo Geo Pocket", "Neo Geo Pocket Color", "Nintendo 3DS", "Nintendo 64",
+        "Nintendo DS", "Nintendo Entertainment System (NES)", "Nintendo Game Boy",
+        "Nintendo Game Boy Advance", "Nintendo Game Boy Color", "Nintendo GameCube",
+        "Nintendo Switch", "Nintendo Wii", "Nintendo Wii U", "PC", "PC-Engine",
+        "Sega CD", "Sega Dreamcast", "Sega Game Gear", "Sega Genesis",
+        "Sega Master System", "Sega Saturn", "SEGA SG-1000", "Sharp X68000",
+        "Super Nintendo (SNES)", "Sony Playstation (PSX)", "Sony Playstation 2",
+        "Sony Playstation 4", "Sony PSP", "Sony Playstation Vita",
+        "TurboGrafx 16", "TurboGrafx CD", "WonderSwan", "WonderSwan Color"
+    ]
+    
+    // Game status options (en español)
+    private let gameStatusOptions = ["Revisión", "Finalizado", "Por Jugar", "Jugando"]
     
     init(game: Game, viewModel: GamesViewModel) {
         self.originalGame = game
@@ -23,337 +50,222 @@ struct EditGameView: View {
         _completionDate = State(initialValue: game.completionDate)
         _score = State(initialValue: game.score)
         _review = State(initialValue: game.review)
+        _description = State(initialValue: game.description)
+        _trailer = State(initialValue: game.trailer ?? "")
+        _gameStatus = State(initialValue: game.gameStatus)
+        _coverImageURL = State(initialValue: game.coverImage.hasPrefix("http") ? game.coverImage : "")
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Retro Header - IMPROVED LAYOUT
-            ZStack {
-                AppTheme.primaryColor
-                    .overlay(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.white.opacity(0.1),
-                                Color.clear
-                            ]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                
-                HStack(spacing: AppTheme.mediumSpacing) {
-                    // Cancel Button - Fixed width
+        NavigationView {
+            VStack(spacing: 0) {
+                // Header (estilo pixel consistente)
+                HStack {
                     Button("CANCEL") {
                         presentationMode.wrappedValue.dismiss()
                     }
-                    .font(AppTheme.body)
+                    .font(.pixelBody)
                     .foregroundColor(.white)
-                    .frame(width: 80)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                            .fill(Color.white.opacity(0.2))
-                    )
                     
-                    // Title - Centered with flexible space
                     Spacer()
                     
                     Text("EDIT GAME")
-                        .font(AppTheme.title)
+                        .font(.pixelTitle)
                         .foregroundColor(.white)
-                        .textCase(.uppercase)
-                        .fixedSize()
                     
                     Spacer()
                     
-                    // Save Button - Fixed width matching Cancel
                     Button("SAVE") {
                         saveGame()
                     }
-                    .font(AppTheme.body)
-                    .foregroundColor(title.isEmpty || platform.isEmpty || review.isEmpty ? .gray : .white)
-                    .frame(width: 80)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                            .fill(title.isEmpty || platform.isEmpty || review.isEmpty ?
-                                  Color.white.opacity(0.2) : AppTheme.secondaryColor)
-                    )
-                    .disabled(title.isEmpty || platform.isEmpty || review.isEmpty)
+                    .font(.pixelBody)
+                    .foregroundColor(.white)
+                    .disabled(title.isEmpty || platform.isEmpty)
                 }
-                .padding(.horizontal, AppTheme.largeSpacing)
-                .padding(.vertical, AppTheme.mediumSpacing)
-            }
-            .frame(height: 60) // Fixed height for consistency
-            
-            ScrollView {
-                VStack(spacing: AppTheme.largeSpacing) {
-                    // Game Information Card
-                    VStack(spacing: AppTheme.mediumSpacing) {
-                        HStack {
-                            Text("GAME INFORMATION")
-                                .font(AppTheme.title)
-                                .foregroundColor(AppTheme.primaryColor)
-                                .textCase(.uppercase)
-                            Spacer()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 20)
+                .background(Color.snesRed)
+                
+                // Form
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // TITLE
+                        FormField(title: "TITLE", isRequired: true) {
+                            TextField("Game name", text: $title)
+                                .textFieldStyle()
                         }
                         
-                        VStack(spacing: AppTheme.mediumSpacing) {
-                            PixelTextField(title: "GAME TITLE", text: $title, placeholder: "Enter game title...")
-                            PixelTextField(title: "PLATFORM", text: $platform, placeholder: "e.g., SNES, PSX, N64...")
-                            
-                            // Date Picker with Retro Style
-                            VStack(alignment: .leading, spacing: AppTheme.smallSpacing) {
-                                Text("COMPLETION DATE")
-                                    .font(AppTheme.caption)
-                                    .foregroundColor(AppTheme.textColor)
-                                    .textCase(.uppercase)
-                                
-                                DatePicker("", selection: $completionDate, displayedComponents: .date)
-                                    .datePickerStyle(CompactDatePickerStyle())
-                                    .accentColor(AppTheme.accentColor)
-                                    .padding(AppTheme.smallSpacing)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                                            .fill(AppTheme.backgroundColor)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                                                    .stroke(AppTheme.accentColor, lineWidth: 1)
-                                            )
-                                    )
-                            }
-                        }
-                    }
-                    .padding(AppTheme.mediumSpacing)
-                    .background(
-                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
-                            .fill(Color.white)
-                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
-                    )
-                    
-                    // Rating Card
-                    VStack(spacing: AppTheme.mediumSpacing) {
-                        HStack {
-                            Text("GAME RATING")
-                                .font(AppTheme.title)
-                                .foregroundColor(AppTheme.primaryColor)
-                                .textCase(.uppercase)
-                            Spacer()
-                        }
-                        
-                        VStack(spacing: AppTheme.mediumSpacing) {
-                            HStack {
-                                Text("SCORE: \(score)/10")
-                                    .font(AppTheme.body)
-                                    .foregroundColor(AppTheme.textColor)
-                                    .fontWeight(.bold)
-                                
-                                Spacer()
-                                
-                                HStack(spacing: 4) {
-                                    Button("-") {
-                                        if score > 1 { score -= 1 }
-                                    }
-                                    .font(AppTheme.body)
-                                    .foregroundColor(.white)
-                                    .frame(width: 32, height: 32)
-                                    .background(AppTheme.primaryColor)
-                                    .cornerRadius(AppTheme.smallCornerRadius)
-                                    .disabled(score <= 1)
+                        // PLATFORM (con picker)
+                        FormField(title: "PLATFORM", isRequired: true) {
+                            Button(action: {
+                                showingPlatformPicker = true
+                            }) {
+                                HStack {
+                                    Text(platform.isEmpty ? "Select platform..." : platform)
+                                        .foregroundColor(platform.isEmpty ? Color.darkGray.opacity(0.6) : Color.darkGray)
+                                        .font(.pixelBody)
                                     
-                                    Button("+") {
-                                        if score < 10 { score += 1 }
-                                    }
-                                    .font(AppTheme.body)
-                                    .foregroundColor(.white)
-                                    .frame(width: 32, height: 32)
-                                    .background(AppTheme.primaryColor)
-                                    .cornerRadius(AppTheme.smallCornerRadius)
-                                    .disabled(score >= 10)
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.down")
+                                        .foregroundColor(Color.darkGray)
+                                        .font(.pixelCaption)
                                 }
+                                .padding(12)
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.darkGray, lineWidth: 2)
+                                )
                             }
-                            
-                            // Pixel-style score bar
-                            HStack(spacing: 2) {
-                                ForEach(1...10, id: \.self) { index in
-                                    Rectangle()
-                                        .fill(index <= score ? AppTheme.secondaryColor : AppTheme.textColor.opacity(0.3))
-                                        .frame(height: 16)
-                                        .onTapGesture {
-                                            score = index
-                                        }
-                                }
-                            }
-                            .cornerRadius(AppTheme.smallCornerRadius)
-                        }
-                    }
-                    .padding(AppTheme.mediumSpacing)
-                    .background(
-                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
-                            .fill(Color.white)
-                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
-                    )
-                    
-                    // Review Card
-                    VStack(spacing: AppTheme.mediumSpacing) {
-                        HStack {
-                            Text("GAME REVIEW")
-                                .font(AppTheme.title)
-                                .foregroundColor(AppTheme.primaryColor)
-                                .textCase(.uppercase)
-                            Spacer()
                         }
                         
-                        VStack(alignment: .leading, spacing: AppTheme.smallSpacing) {
-                            Text("WRITE YOUR REVIEW")
-                                .font(AppTheme.caption)
-                                .foregroundColor(AppTheme.textColor)
-                                .textCase(.uppercase)
-                            
-                            TextEditor(text: $review)
-                                .font(.system(size: 16, design: .default))
-                                .foregroundColor(AppTheme.textColor)
-                                .frame(minHeight: 120)
-                                .padding(AppTheme.smallSpacing)
-                                .background(
-                                    RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                                        .fill(AppTheme.backgroundColor)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                                                .stroke(AppTheme.accentColor, lineWidth: 1)
-                                        )
+                        // DESCRIPTION
+                        FormField(title: "DESCRIPTION") {
+                            TextEditor(text: $description)
+                                .font(.pixelBody)
+                                .frame(minHeight: 80)
+                                .padding(8)
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.darkGray, lineWidth: 2)
                                 )
-                        }
-                    }
-                    .padding(AppTheme.mediumSpacing)
-                    .background(
-                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
-                            .fill(Color.white)
-                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
-                    )
-                    
-                    // Cover Image Card
-                    VStack(spacing: AppTheme.mediumSpacing) {
-                        HStack {
-                            Text("COVER IMAGE")
-                                .font(AppTheme.title)
-                                .foregroundColor(AppTheme.primaryColor)
-                                .textCase(.uppercase)
-                            Spacer()
                         }
                         
-                        HStack(spacing: AppTheme.mediumSpacing) {
-                            // Current image preview
-                            RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius)
-                                .fill(AppTheme.textColor)
-                                .frame(width: 80, height: 80)
-                                .overlay(
-                                    Group {
-                                        if originalGame.coverImage.hasPrefix("http") {
-                                            AsyncImage(url: URL(string: originalGame.coverImage)) { image in
-                                                image
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fill)
-                                            } placeholder: {
-                                                Image(systemName: "gamepad.fill")
-                                                    .font(.system(size: AppTheme.mediumIconSize, design: .monospaced))
-                                                    .foregroundColor(.white)
-                                            }
-                                            .clipShape(RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius))
-                                        } else {
-                                            Image(systemName: originalGame.coverImage)
-                                                .font(.system(size: AppTheme.mediumIconSize, design: .monospaced))
-                                                .foregroundColor(.white)
+                        // TRAILER
+                        FormField(title: "TRAILER (YouTube URL)") {
+                            TextField("https://www.youtube.com/watch?v=...", text: $trailer)
+                                .textFieldStyle()
+                                .autocapitalization(.none)
+                                .keyboardType(.URL)
+                        }
+                        
+                        // COMPLETION DATE
+                        FormField(title: "COMPLETION DATE", isRequired: true) {
+                            DatePicker("", selection: $completionDate, displayedComponents: .date)
+                                .datePickerStyle(CompactDatePickerStyle())
+                                .font(.pixelBody)
+                                .accentColor(Color.retroBlue)
+                        }
+                        
+                        // GAME STATUS
+                        FormField(title: "STATUS") {
+                            Picker("Status", selection: $gameStatus) {
+                                ForEach(gameStatusOptions, id: \.self) { status in
+                                    Text(status)
+                                        .font(.pixelBody)
+                                        .tag(status)
+                                }
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .colorMultiply(Color.retroBlue)
+                        }
+                        
+                        // SCORE
+                        FormField(title: "SCORE: \(score)/10") {
+                            VStack(spacing: 8) {
+                                HStack {
+                                    Spacer()
+                                    
+                                    HStack(spacing: 8) {
+                                        Button("-") {
+                                            if score > 1 { score -= 1 }
                                         }
+                                        .font(.pixelBody)
+                                        .foregroundColor(.white)
+                                        .frame(width: 32, height: 32)
+                                        .background(Color.snesRed)
+                                        .cornerRadius(6)
+                                        .disabled(score <= 1)
+                                        
+                                        Button("+") {
+                                            if score < 10 { score += 1 }
+                                        }
+                                        .font(.pixelBody)
+                                        .foregroundColor(.white)
+                                        .frame(width: 32, height: 32)
+                                        .background(Color.snesRed)
+                                        .cornerRadius(6)
+                                        .disabled(score >= 10)
                                     }
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: AppTheme.largeCornerRadius)
-                                        .stroke(AppTheme.accentColor, lineWidth: 2)
-                                )
-                            
-                            VStack(alignment: .leading, spacing: AppTheme.smallSpacing) {
-                                Text("CURRENT IMAGE")
-                                    .font(AppTheme.body)
-                                    .foregroundColor(AppTheme.textColor)
-                                    .fontWeight(.bold)
+                                }
                                 
-                                Text("Image upload coming soon")
-                                    .font(AppTheme.caption)
-                                    .foregroundColor(AppTheme.textColor.opacity(0.7))
-                                    .textCase(.uppercase)
+                                // Score visual
+                                HStack(spacing: 4) {
+                                    ForEach(1...10, id: \.self) { index in
+                                        Circle()
+                                            .fill(index <= score ? Color.arcadeYellow : Color.darkGray.opacity(0.3))
+                                            .frame(width: 12, height: 12)
+                                            .onTapGesture {
+                                                score = index
+                                            }
+                                    }
+                                }
                             }
-                            
-                            Spacer()
-                            
-                            Button("CHANGE") {
-                                showingImagePicker = true
-                            }
-                            .font(AppTheme.caption)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(AppTheme.textColor.opacity(0.5))
-                            .cornerRadius(AppTheme.smallCornerRadius)
-                            .disabled(true) // Disabled for now
                         }
+                        
+                        // PERSONAL REVIEW
+                        FormField(title: "PERSONAL REVIEW") {
+                            TextEditor(text: $review)
+                                .font(.pixelBody)
+                                .frame(minHeight: 120)
+                                .padding(8)
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.darkGray, lineWidth: 2)
+                                )
+                        }
+                        
+                        // COVER IMAGE URL
+                            ImageURLField(title: "COVER IMAGE", imageURL: $coverImageURL)
                     }
-                    .padding(AppTheme.mediumSpacing)
-                    .background(
-                        RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
-                            .fill(Color.white)
-                            .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
-                    )
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal, AppTheme.largeSpacing)
-                .padding(.top, AppTheme.mediumSpacing)
-                .padding(.bottom, 40)
+                .background(Color.lightGray)
             }
-            .background(AppTheme.backgroundColor)
+            .navigationBarHidden(true)
+        }
+        .sheet(isPresented: $showingPlatformPicker) {
+            PlatformPickerView(
+                selectedPlatform: $platform,
+                availablePlatforms: platformOptions,
+                isPresented: $showingPlatformPicker
+            )
         }
     }
     
     private func saveGame() {
+        // Determinar la imagen final
+        let finalCoverImage: String
+        if !coverImageURL.isEmpty {
+            finalCoverImage = coverImageURL
+        } else if originalGame.coverImage.hasPrefix("http") {
+            finalCoverImage = "gamepad.fill" // Si se borró la URL, usar ícono
+        } else {
+            finalCoverImage = originalGame.coverImage // Mantener ícono existente
+        }
+        
         let updatedGame = Game(
             id: originalGame.id,
             title: title,
             platform: platform,
             completionDate: completionDate,
             score: score,
-            coverImage: originalGame.coverImage, // Keep original image for now
-            review: review
+            coverImage: finalCoverImage,
+            review: review,
+            description: description,
+            trailer: trailer.isEmpty ? nil : trailer,
+            gameStatus: gameStatus
         )
         
         viewModel.updateGame(updatedGame)
         presentationMode.wrappedValue.dismiss()
-    }
-}
-
-// MARK: - Supporting Views
-struct PixelTextField: View {
-    let title: String
-    @Binding var text: String
-    let placeholder: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.smallSpacing) {
-            Text(title)
-                .font(AppTheme.caption)
-                .foregroundColor(AppTheme.textColor)
-                .textCase(.uppercase)
-            
-            TextField(placeholder, text: $text)
-                .font(.system(size: 16, design: .default))
-                .foregroundColor(AppTheme.textColor)
-                .padding(AppTheme.smallSpacing)
-                .background(
-                    RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                        .fill(AppTheme.backgroundColor)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
-                                .stroke(AppTheme.accentColor, lineWidth: 1)
-                        )
-                )
-        }
     }
 }

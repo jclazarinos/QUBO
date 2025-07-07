@@ -2,7 +2,7 @@
 import SwiftUI
 
 struct GameDetailView: View {
-    let game: Game
+    @State private var currentGame: Game
     @ObservedObject var viewModel: GamesViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var showingEditSheet = false
@@ -12,12 +12,12 @@ struct GameDetailView: View {
         ScrollView {
             VStack(spacing: 0) {
                 // 1. HERO IMAGE (estilo Steam)
-                HeroImageView(game: game, presentationMode: presentationMode, showingEditSheet: $showingEditSheet, showingDeleteAlert: $showingDeleteAlert)
+                HeroImageView(game: currentGame, presentationMode: presentationMode, showingEditSheet: $showingEditSheet, showingDeleteAlert: $showingDeleteAlert)
                 
                 VStack(spacing: 20) {
                     // 2. TÍTULO
                     HStack {
-                        Text(game.title)
+                        Text(currentGame.title)
                             .font(.system(size: 28, weight: .bold, design: .default))
                             .foregroundColor(.primary)
                             .multilineTextAlignment(.leading)
@@ -27,34 +27,42 @@ struct GameDetailView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 16)
                     
-                    // 3. DESCRIPCIÓN (JUSTIFICADA)
-                    if !game.description.cleanHTMLForDisplay().isEmpty {
+                    // 3. DESCRIPCIÓN (JUSTIFICADA) - USAR currentGame
+                    if !currentGame.description.cleanHTMLForDisplay().isEmpty {
                         VStack {
-                            GameDescriptionText(text: game.description.cleanHTMLForDisplay())
+                            GameDescriptionText(text: currentGame.description.cleanHTMLForDisplay())
                         }
                         .padding(.horizontal, 20)
                     }
                     
                     // 4. DATOS COMPACTOS (estilo Steam)
-                    GameStatsRow(game: game)
+                    GameStatsRow(game: currentGame)
                         .padding(.horizontal, 20)
                     
                     // 5. TRAILER (si existe)
-                    if game.hasTrailer {
-                        TrailerSection(game: game)
+                    if currentGame.hasTrailer {
+                        TrailerSection(game: currentGame)
                             .padding(.horizontal, 20)
                     }
                     
                     // 6. REVIEW (último, con acordeón)
-                    ReviewAccordionView(game: game, showingEditSheet: $showingEditSheet)
+                    ReviewAccordionView(game: currentGame, showingEditSheet: $showingEditSheet)
                         .padding(.horizontal, 20)
                 }
                 .padding(.bottom, 40)
             }
         }
         .background(Color(.systemBackground))
+        .onAppear {
+            // Actualizar currentGame cuando aparece la vista
+            updateCurrentGame()
+        }
+        .onChange(of: viewModel.games) { _ in
+            // Actualizar currentGame cuando el ViewModel cambia
+            updateCurrentGame()
+        }
         .sheet(isPresented: $showingEditSheet) {
-            EditGameView(game: game, viewModel: viewModel)
+            EditGameView(game: currentGame, viewModel: viewModel)
         }
         .alert("DELETE GAME", isPresented: $showingDeleteAlert) {
             Button("CANCEL", role: .cancel) { }
@@ -71,7 +79,19 @@ struct GameDetailView: View {
         presentationMode.wrappedValue.dismiss()
     }
 }
+// AGREGAR este método helper:
+private func updateCurrentGame() {
+    if let updatedGame = viewModel.games.first(where: { $0.id == game.id }) {
+        currentGame = updatedGame
+    }
+}
 
+// CAMBIAR el init para inicializar currentGame:
+init(game: Game, viewModel: GamesViewModel) {
+    self.game = game
+    self.viewModel = viewModel
+    self._currentGame = State(initialValue: game)
+}
 // MARK: - Hero Image Component
 struct HeroImageView: View {
     let game: Game

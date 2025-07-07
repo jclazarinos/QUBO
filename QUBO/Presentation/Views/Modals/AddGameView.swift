@@ -16,6 +16,7 @@ struct AddGameView: View {
     @State private var description = ""
     @State private var trailer = ""
     @State private var gameStatus = "Finalizado"
+    @State private var coverImageURL = "" // NUEVO CAMPO AGREGADO
     
     // Estado para platform picker
     @State private var showingPlatformPicker = false
@@ -212,6 +213,9 @@ struct AddGameView: View {
                                         .stroke(Color.darkGray, lineWidth: 2)
                                 )
                         }
+                        
+                        // COVER IMAGE URL - NUEVO CAMPO
+                        ImageURLField(title: "COVER IMAGE", imageURL: $coverImageURL)
                     }
                     .padding(.horizontal, AppTheme.largeSpacing)
                     .padding(.top, 20)
@@ -232,12 +236,15 @@ struct AddGameView: View {
     
     // MARK: - Actions
     private func saveGame() {
+        // Usar URL de imagen si está disponible, sino usar ícono por defecto
+        let finalCoverImage = coverImageURL.isEmpty ? "gamepad.fill" : coverImageURL
+        
         let newGame = Game(
             title: title,
             platform: platform,
             completionDate: completionDate,
             score: score,
-            coverImage: "gamepad.fill", // Default, se puede cambiar después
+            coverImage: finalCoverImage,
             review: review,
             description: description,
             trailer: trailer.isEmpty ? nil : trailer,
@@ -246,123 +253,5 @@ struct AddGameView: View {
         
         viewModel.addGame(newGame)
         presentationMode.wrappedValue.dismiss()
-    }
-}
-
-// MARK: - Form Field Component
-struct FormField<Content: View>: View {
-    let title: String
-    let isRequired: Bool
-    let content: Content
-    
-    init(title: String, isRequired: Bool = false, @ViewBuilder content: () -> Content) {
-        self.title = title
-        self.isRequired = isRequired
-        self.content = content()
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.smallSpacing) {
-            HStack {
-                Text(title)
-                    .font(.pixelHeading)
-                    .foregroundColor(Color.darkGray)
-                
-                if isRequired {
-                    Text("*")
-                        .font(.pixelHeading)
-                        .foregroundColor(Color.snesRed)
-                }
-                
-                Spacer()
-            }
-            
-            content
-        }
-    }
-}
-
-// MARK: - TextField Style Extension
-extension TextField {
-    func textFieldStyle() -> some View {
-        self
-            .font(.pixelBody)
-            .padding(12)
-            .background(Color.white)
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.darkGray, lineWidth: 2)
-            )
-    }
-}
-
-// MARK: - Platform Picker View
-struct PlatformPickerView: View {
-    @Binding var selectedPlatform: String
-    let availablePlatforms: [String]
-    @Binding var isPresented: Bool
-    
-    @State private var searchText = ""
-    
-    var filteredPlatforms: [String] {
-        if searchText.isEmpty {
-            return availablePlatforms
-        } else {
-            return availablePlatforms.filter { $0.localizedCaseInsensitiveContains(searchText) }
-        }
-    }
-    
-    var body: some View {
-        NavigationView {
-            VStack {
-                // Search bar
-                TextField("Search platforms...", text: $searchText)
-                    .font(.pixelBody)
-                    .padding(12)
-                    .background(Color.white)
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.darkGray, lineWidth: 2)
-                    )
-                    .padding(.horizontal)
-                    .padding(.top)
-                
-                // Platform list
-                List {
-                    // Existing platforms
-                    ForEach(filteredPlatforms, id: \.self) { platform in
-                        Button(action: {
-                            selectedPlatform = platform
-                            isPresented = false
-                        }) {
-                            HStack {
-                                Text(platform)
-                                    .foregroundColor(Color.darkGray)
-                                    .font(.pixelBody)
-                                Spacer()
-                                if selectedPlatform == platform {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(Color.retroBlue)
-                                        .font(.pixelBody)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Select Platform")
-            .navigationBarTitleDisplayMode(.inline)
-            .font(.pixelHeading)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        isPresented = false
-                    }
-                    .font(.pixelBody)
-                }
-            }
-        }
     }
 }

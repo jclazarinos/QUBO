@@ -39,6 +39,10 @@
 		579FACE32E1BBF6C00CB152B /* String+HTMLCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACE22E1BBF6C00CB152B /* String+HTMLCleaner.swift */; };
 		579FACE52E1BC5BB00CB152B /* JustifiedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACE42E1BC5BB00CB152B /* JustifiedText.swift */; };
 		579FACEF2E1BCE7200CB152B /* AVPlayerYouTubeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACEE2E1BCE7200CB152B /* AVPlayerYouTubeView.swift */; };
+		579FACF12E1BD86600CB152B /* PlatformPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACF02E1BD86600CB152B /* PlatformPickerView.swift */; };
+		579FACF32E1BDDA600CB152B /* ImageURLField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACF22E1BDDA600CB152B /* ImageURLField.swift */; };
+		579FACF52E1BE25100CB152B /* FormField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACF42E1BE25100CB152B /* FormField.swift */; };
+		579FACF72E1BE31800CB152B /* TextField+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579FACF62E1BE31800CB152B /* TextField+Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,6 +79,10 @@
 		579FACE22E1BBF6C00CB152B /* String+HTMLCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+HTMLCleaner.swift"; sourceTree = "<group>"; };
 		579FACE42E1BC5BB00CB152B /* JustifiedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JustifiedText.swift; sourceTree = "<group>"; };
 		579FACEE2E1BCE7200CB152B /* AVPlayerYouTubeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayerYouTubeView.swift; sourceTree = "<group>"; };
+		579FACF02E1BD86600CB152B /* PlatformPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformPickerView.swift; sourceTree = "<group>"; };
+		579FACF22E1BDDA600CB152B /* ImageURLField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageURLField.swift; sourceTree = "<group>"; };
+		579FACF42E1BE25100CB152B /* FormField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormField.swift; sourceTree = "<group>"; };
+		579FACF62E1BE31800CB152B /* TextField+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextField+Extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +117,9 @@
 			children = (
 				3CECBB002E15DC04002BE9F8 /* TopBar.swift */,
 				579FACEE2E1BCE7200CB152B /* AVPlayerYouTubeView.swift */,
+				579FACF02E1BD86600CB152B /* PlatformPickerView.swift */,
+				579FACF22E1BDDA600CB152B /* ImageURLField.swift */,
+				579FACF42E1BE25100CB152B /* FormField.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -299,6 +310,7 @@
 				579FACE02E1BBF4F00CB152B /* Game+Extension.swift */,
 				579FACE22E1BBF6C00CB152B /* String+HTMLCleaner.swift */,
 				579FACE42E1BC5BB00CB152B /* JustifiedText.swift */,
+				579FACF62E1BE31800CB152B /* TextField+Extensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -389,8 +401,10 @@
 				3CF90E422E0C87820002C212 /* GameRepository.swift in Sources */,
 				3CF90E492E0C87F60002C212 /* AddGameView.swift in Sources */,
 				3CF90E1F2E0C846A0002C212 /* QUBOApp.swift in Sources */,
+				579FACF32E1BDDA600CB152B /* ImageURLField.swift in Sources */,
 				579FACE32E1BBF6C00CB152B /* String+HTMLCleaner.swift in Sources */,
 				3CF90E3A2E0C86DC0002C212 /* Enums.swift in Sources */,
+				579FACF72E1BE31800CB152B /* TextField+Extensions.swift in Sources */,
 				3CF90E3C2E0C87080002C212 /* GameUseCases.swift in Sources */,
 				3CF90E602E0C8A860002C212 /* AccordionSection.swift in Sources */,
 				3CF90E362E0C86380002C212 /* GamesViewModel.swift in Sources */,
@@ -404,7 +418,9 @@
 				3CF90E3E2E0C87420002C212 /* GameRepositoryProtocol.swift in Sources */,
 				579FACEF2E1BCE7200CB152B /* AVPlayerYouTubeView.swift in Sources */,
 				3CF90E4B2E0C880E0002C212 /* GameDetailView.swift in Sources */,
+				579FACF52E1BE25100CB152B /* FormField.swift in Sources */,
 				3CECBAFC2E15C188002BE9F8 /* APIService.swift in Sources */,
+				579FACF12E1BD86600CB152B /* PlatformPickerView.swift in Sources */,
 				3CF90E5A2E0C89B70002C212 /* Color+Extensions.swift in Sources */,
 				3CF90E382E0C867E0002C212 /* Game.swift in Sources */,
 				3CF90E4D2E0C88250002C212 /* MainContentView.swift in Sources */,

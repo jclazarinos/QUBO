@@ -1,15 +1,14 @@
-// MARK: - Presentation/Views/Modals/GameDetailView.swift - Estilo Steam
+// MARK: - Presentation/Views/Modals/GameDetailView.swift - Estilo Steam con tema retro
 import SwiftUI
 
 struct GameDetailView: View {
-    let game: Game // ← AGREGAR: Referencia original
+    let game: Game
     @State private var currentGame: Game
     @ObservedObject var viewModel: GamesViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var showingEditSheet = false
     @State private var showingDeleteAlert = false
     
-    // AGREGAR el init correcto:
     init(game: Game, viewModel: GamesViewModel) {
         self.game = game
         self.viewModel = viewModel
@@ -22,51 +21,49 @@ struct GameDetailView: View {
                 // 1. HERO IMAGE (estilo Steam)
                 HeroImageView(game: currentGame, presentationMode: presentationMode, showingEditSheet: $showingEditSheet, showingDeleteAlert: $showingDeleteAlert)
                 
-                VStack(spacing: 20) {
+                VStack(spacing: AppTheme.largeSpacing) {
                     // 2. TÍTULO
                     HStack {
                         Text(currentGame.title)
-                            .font(.system(size: 28, weight: .bold, design: .default))
-                            .foregroundColor(.primary)
+                            .font(AppTheme.largeTitle)
+                            .foregroundColor(AppTheme.textColor)
                             .multilineTextAlignment(.leading)
                         
                         Spacer()
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
+                    .padding(.horizontal, AppTheme.largeSpacing)
+                    .padding(.top, AppTheme.mediumSpacing)
                     
-                    // 3. DESCRIPCIÓN (JUSTIFICADA) - USAR currentGame
+                    // 3. DESCRIPCIÓN (JUSTIFICADA)
                     if !currentGame.description.cleanHTMLForDisplay().isEmpty {
                         VStack {
                             GameDescriptionText(text: currentGame.description.cleanHTMLForDisplay())
                         }
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, AppTheme.largeSpacing)
                     }
                     
                     // 4. DATOS COMPACTOS (estilo Steam)
                     GameStatsRow(game: currentGame)
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, AppTheme.largeSpacing)
                     
                     // 5. TRAILER (si existe)
                     if currentGame.hasTrailer {
                         TrailerSection(game: currentGame)
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, AppTheme.largeSpacing)
                     }
                     
                     // 6. REVIEW (último, con acordeón)
                     ReviewAccordionView(game: currentGame, showingEditSheet: $showingEditSheet)
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, AppTheme.largeSpacing)
                 }
                 .padding(.bottom, 40)
             }
         }
-        .background(Color(.systemBackground))
+        .background(AppTheme.backgroundColor)
         .onAppear {
-            // Actualizar currentGame cuando aparece la vista
             updateCurrentGame()
         }
         .onChange(of: viewModel.games) { _ in
-            // Actualizar currentGame cuando el ViewModel cambia
             updateCurrentGame()
         }
         .sheet(isPresented: $showingEditSheet) {
@@ -78,11 +75,10 @@ struct GameDetailView: View {
                 deleteGame()
             }
         } message: {
-            Text("Are you sure you want to delete '\(currentGame.title)'?") // ← CAMBIAR a currentGame
+            Text("Are you sure you want to delete '\(currentGame.title)'?")
         }
     }
     
-    // AGREGAR este método helper:
     private func updateCurrentGame() {
         if let updatedGame = viewModel.games.first(where: { $0.id == game.id }) {
             currentGame = updatedGame
@@ -90,7 +86,7 @@ struct GameDetailView: View {
     }
     
     private func deleteGame() {
-        viewModel.deleteGame(withId: currentGame.id) // ← CAMBIAR a currentGame
+        viewModel.deleteGame(withId: currentGame.id)
         presentationMode.wrappedValue.dismiss()
     }
 }
@@ -104,7 +100,7 @@ struct HeroImageView: View {
     
     var body: some View {
         ZStack {
-            // Background Image - ARREGLADO para manejar íconos
+            // Background Image
             if game.coverImage.hasPrefix("http") {
                 AsyncImage(url: URL(string: game.coverImage)) { image in
                     image
@@ -123,7 +119,6 @@ struct HeroImageView: View {
                         )
                 }
             } else {
-                // Es un ícono SF Symbol
                 Rectangle()
                     .fill(AppTheme.primaryColor)
                     .frame(height: 300)
@@ -153,7 +148,7 @@ struct HeroImageView: View {
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 18, weight: .bold))
+                            .font(AppTheme.body)
                             .foregroundColor(.white)
                             .frame(width: 40, height: 40)
                             .background(Color.black.opacity(0.5))
@@ -168,24 +163,26 @@ struct HeroImageView: View {
                             showingEditSheet = true
                         } label: {
                             Label("Edit Game", systemImage: "pencil")
+                                .font(AppTheme.body)
                         }
                         
                         Button(role: .destructive) {
                             showingDeleteAlert = true
                         } label: {
                             Label("Delete Game", systemImage: "trash")
+                                .font(AppTheme.body)
                         }
                     } label: {
                         Image(systemName: "ellipsis")
-                            .font(.system(size: 18, weight: .bold))
+                            .font(AppTheme.body)
                             .foregroundColor(.white)
                             .frame(width: 40, height: 40)
                             .background(Color.black.opacity(0.5))
                             .clipShape(Circle())
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
+                .padding(.horizontal, AppTheme.largeSpacing)
+                .padding(.top, AppTheme.smallSpacing)
                 
                 Spacer()
             }
@@ -194,58 +191,62 @@ struct HeroImageView: View {
     }
 }
 
-// MARK: - Game Stats Row (estilo Steam compacto)
+// MARK: - Game Stats Row (estilo Steam compacto con tema)
 struct GameStatsRow: View {
     let game: Game
     
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: AppTheme.mediumSpacing) {
             // Score
             StatItem(
                 icon: "star.fill",
                 value: "\(game.score)/10",
                 label: "Score",
-                color: .orange
+                color: AppTheme.secondaryColor
             )
             
             Divider()
                 .frame(height: 30)
+                .background(AppTheme.textColor.opacity(0.3))
             
             // Year
             StatItem(
                 icon: "calendar",
                 value: game.formattedYear,
                 label: "Completed",
-                color: .blue
+                color: AppTheme.accentColor
             )
             
             Divider()
                 .frame(height: 30)
+                .background(AppTheme.textColor.opacity(0.3))
             
             // Platform
             StatItem(
                 icon: "gamecontroller.fill",
                 value: game.platform,
                 label: "Platform",
-                color: .green
+                color: AppTheme.primaryColor
             )
             
             Divider()
                 .frame(height: 30)
+                .background(AppTheme.textColor.opacity(0.3))
             
             // Status
             StatItem(
                 icon: "checkmark.circle.fill",
                 value: game.gameStatus,
                 label: "Status",
-                color: .purple
+                color: Color.green
             )
         }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 20)
+        .padding(.vertical, AppTheme.mediumSpacing)
+        .padding(.horizontal, AppTheme.largeSpacing)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground))
+            RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
+                .fill(Color.white.opacity(0.9))
+                .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
         )
     }
 }
@@ -259,18 +260,18 @@ struct StatItem: View {
     var body: some View {
         VStack(spacing: 4) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
+                .font(AppTheme.body)
                 .foregroundColor(color)
             
             Text(value)
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.primary)
+                .font(AppTheme.caption)
+                .foregroundColor(AppTheme.textColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             
             Text(label)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.secondary)
+                .font(.system(size: 10, weight: .regular, design: .monospaced))
+                .foregroundColor(AppTheme.textColor.opacity(0.7))
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity)
@@ -283,11 +284,11 @@ struct TrailerSection: View {
     @State private var showingTrailer = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: AppTheme.smallSpacing) {
             HStack {
                 Text("TRAILER")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(AppTheme.title)
+                    .foregroundColor(AppTheme.textColor)
                 
                 Spacer()
             }
@@ -304,12 +305,12 @@ struct TrailerSection: View {
                             .clipped()
                     } placeholder: {
                         Rectangle()
-                            .fill(Color(.systemGray4))
+                            .fill(AppTheme.textColor.opacity(0.2))
                             .aspectRatio(16/9, contentMode: .fill)
                             .overlay(
                                 Image(systemName: "play.rectangle.fill")
                                     .font(.system(size: 40))
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(AppTheme.textColor.opacity(0.7))
                             )
                     }
                     
@@ -317,16 +318,20 @@ struct TrailerSection: View {
                     Color.black.opacity(0.3)
                     
                     Circle()
-                        .fill(Color.black.opacity(0.7))
+                        .fill(AppTheme.primaryColor.opacity(0.9))
                         .frame(width: 60, height: 60)
                         .overlay(
                             Image(systemName: "play.fill")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
-                                .offset(x: 2) // Slight offset for visual balance
+                                .offset(x: 2)
                         )
                 }
-                .cornerRadius(12)
+                .cornerRadius(AppTheme.mediumCornerRadius)
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
+                        .stroke(AppTheme.textColor.opacity(0.2), lineWidth: 2)
+                )
             }
             .buttonStyle(PlainButtonStyle())
         }
@@ -338,7 +343,7 @@ struct TrailerSection: View {
     }
 }
 
-// MARK: - Review Accordion con texto justificado
+// MARK: - Review Accordion con texto justificado y tema
 struct ReviewAccordionView: View {
     let game: Game
     @Binding var showingEditSheet: Bool
@@ -359,11 +364,11 @@ struct ReviewAccordionView: View {
     }
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: AppTheme.mediumSpacing) {
             HStack {
                 Text("MY REVIEW")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(AppTheme.title)
+                    .foregroundColor(AppTheme.textColor)
                 
                 Spacer()
                 
@@ -372,20 +377,20 @@ struct ReviewAccordionView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "pencil")
-                            .font(.system(size: 12))
+                            .font(AppTheme.caption)
                         Text("EDIT")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(AppTheme.caption)
                     }
                     .foregroundColor(.white)
-                    .padding(.horizontal, 12)
+                    .padding(.horizontal, AppTheme.smallSpacing)
                     .padding(.vertical, 6)
-                    .background(Color.blue)
-                    .cornerRadius(6)
+                    .background(AppTheme.accentColor)
+                    .cornerRadius(AppTheme.smallCornerRadius)
                 }
             }
             
             if game.hasReview {
-                VStack(spacing: 12) {
+                VStack(spacing: AppTheme.smallSpacing) {
                     // TEXTO JUSTIFICADO APLICADO
                     GameReviewText(text: isExpanded ? game.cleanReview : previewText)
                         .animation(.easeInOut(duration: 0.3), value: isExpanded)
@@ -398,20 +403,20 @@ struct ReviewAccordionView: View {
                         } label: {
                             HStack(spacing: 6) {
                                 Text(isExpanded ? "SHOW LESS" : "READ MORE")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(AppTheme.caption)
                                 
                                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                                    .font(.system(size: 12, weight: .bold))
+                                    .font(AppTheme.caption)
                             }
-                            .foregroundColor(.blue)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
+                            .foregroundColor(AppTheme.accentColor)
+                            .padding(.horizontal, AppTheme.mediumSpacing)
+                            .padding(.vertical, AppTheme.smallSpacing)
                             .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.blue.opacity(0.1))
+                                RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
+                                    .fill(AppTheme.accentColor.opacity(0.1))
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                                        RoundedRectangle(cornerRadius: AppTheme.smallCornerRadius)
+                                            .stroke(AppTheme.accentColor.opacity(0.3), lineWidth: 2)
                                     )
                             )
                         }
@@ -419,26 +424,27 @@ struct ReviewAccordionView: View {
                     }
                 }
             } else {
-                VStack(spacing: 12) {
+                VStack(spacing: AppTheme.smallSpacing) {
                     Image(systemName: "doc.text")
                         .font(.system(size: 30))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppTheme.textColor.opacity(0.5))
                     
                     Text("No review available")
-                        .font(.system(size: 16))
-                        .foregroundColor(.secondary)
+                        .font(AppTheme.body)
+                        .foregroundColor(AppTheme.textColor.opacity(0.7))
                     
                     Text("Tap EDIT to add your thoughts")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(AppTheme.caption)
+                        .foregroundColor(AppTheme.textColor.opacity(0.5))
                 }
-                .padding(.vertical, 20)
+                .padding(.vertical, AppTheme.largeSpacing)
             }
         }
-        .padding(20)
+        .padding(AppTheme.largeSpacing)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground))
+            RoundedRectangle(cornerRadius: AppTheme.mediumCornerRadius)
+                .fill(Color.white.opacity(0.85))
+                .shadow(color: AppTheme.textColor.opacity(0.1), radius: 4, x: 2, y: 2)
         )
     }
 }
